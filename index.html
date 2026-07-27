@@ -7,6 +7,7 @@
 
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;600;700;900&display=swap" rel="stylesheet">
@@ -724,6 +725,9 @@
       <div class="p-2 flex flex-wrap gap-2">
         <button id="download-pdf-btn" class="btn-secondary text-xs">
           <i class="fa-solid fa-file-pdf text-red-600"></i> PDF
+        </button>
+        <button id="download-excel-btn" class="btn-secondary text-xs">
+          <i class="fa-solid fa-file-excel text-green-600"></i> Excel
         </button>
         <button id="download-dxf-btn" class="btn-secondary text-xs">
           <i class="fa-solid fa-file-code text-blue-600"></i> DXF
@@ -1715,6 +1719,79 @@ document.addEventListener('DOMContentLoaded', function() {
       html2pdf().set(opt).from(element).save();
       showToast('PDF Downloaded');
     });
+
+    document.getElementById('download-excel-btn').addEventListener('click', function() {
+      exportToExcel();
+    });
+
+    function exportToExcel() {
+      const wb = XLSX.utils.book_new();
+      const data = window._lastCalcData;
+      
+      // Project info rows (unlocked for editing)
+      const wsData = [
+        ['Project Name:', data.projectName || ''],
+        ['Calculation Item:', data.calcItem || ''],
+        ['Date:', data.date || ''],
+        ['Engineer:', data.engineer || ''],
+        ['ACI Code:', data.aciVersion || ''],
+        ['Unit System:', data.unitSystem || ''],
+        [],
+        // Headers for calculation data
+        ['Parameter', 'Symbol', 'Value', 'Unit', 'Formula/Notes']
+      ];
+      
+      // Add input parameters
+      if (data.inputs) {
+        wsData.push(['Bar Size', 'db', data.inputs.barSize, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
+        wsData.push(['Yield Strength', 'fy', data.inputs.fy, 'psi', '']);
+        wsData.push(['Concrete Strength', "f'c", data.inputs.fc, 'psi', '']);
+        wsData.push(['Cover', 'c', data.inputs.cover, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
+        wsData.push(['Spacing', 's', data.inputs.spacing, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
+        wsData.push(['Coating Factor', 'ψe', data.inputs.coatingFactor || 1.0, '', '1.0 uncoated, 1.5 epoxy');
+        wsData.push(['Location Factor', 'ψt', data.inputs.locationFactor || 1.0, '', '1.0 top bar, 1.3 bottom');
+        wsData.push(['Size Factor', 'λ', data.inputs.sizeFactor || 1.0, '', '1.0 normal weight');
+        wsData.push([]);
+      }
+      
+      // Add results with formulas
+      if (data.results) {
+        wsData.push(['Tension Development Length', 'ld', data.results.ld, data.unitSystem === 'imperial' ? 'in' : 'mm', '=MAX((3*fy*ψe*ψt*ψs)/(40*√f\'c*λ)*(db/(c+Ktr)),12in)']);
+        wsData.push(['Compression Development', 'ldc', data.results.ldc, data.unitSystem === 'imperial' ? 'in' : 'mm', '=MAX(0.02*fy*db/√f\'c,0.0003*fy*db,8in)']);
+        wsData.push(['Class A Splice', 'lsA', data.results.lsA, data.unitSystem === 'imperial' ? 'in' : 'mm', '=1.0*ld']);
+        wsData.push(['Class B Splice', 'lsB', data.results.lsB, data.unitSystem === 'imperial' ? 'in' : 'mm', '=1.3*ld']);
+        wsData.push(['Hook Development', 'ldh', data.results.ldh, data.unitSystem === 'imperial' ? 'in' : 'mm', '=0.02*ψe*ψc*ψr*fy*db/√f\'c']);
+        wsData.push(['Headed Bar', 'ldt', data.results.ldt, data.unitSystem === 'imperial' ? 'in' : 'mm', '=0.016*ψe*fy*db/√f\'c']);
+      }
+      
+      const ws = XLSX.utils.aoa_to_sheet(wsData);
+      
+      // Set column widths
+      ws['!cols'] = [
+        { wch: 25 },
+        { wch: 10 },
+        { wch: 12 },
+        { wch: 8 },
+        { wch: 45 }
+      ];
+      
+      // Protect sheet but leave first 6 rows unlocked
+      ws['!protect'] = { password: '', selectLockedCells: true, selectUnlockedCells: true };
+      
+      // Mark first 6 rows as unlocked
+      for (let row = 0; row < 6; row++) {
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let col = range.s.c; col <= range.e.c; col++) {
+          const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
+          if (!ws[cellRef]) continue;
+          ws[cellRef].locked = false;
+        }
+      }
+      
+      XLSX.utils.book_append_sheet(wb, ws, 'Calculation');
+      XLSX.writeFile(wb, 'rebar_calculation.xlsx');
+      showToast('Excel Downloaded');
+    }
 
     document.getElementById('download-dxf-btn').addEventListener('click', function() {
       const dxfContent = generateDXF(window._lastCalcData);
