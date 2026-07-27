@@ -438,8 +438,8 @@
           <div>
             <label class="input-label">Unit System</label>
             <div class="unit-toggle" id="unit-toggle">
-              <button class="active" data-unit="imperial">Imperial (in, psi)</button>
-              <button data-unit="metric">Metric (mm, MPa)</button>
+              <button type="button" class="active" data-unit="imperial">Imperial (in, psi)</button>
+              <button type="button" data-unit="metric">Metric (mm, MPa)</button>
             </div>
           </div>
 
@@ -603,11 +603,11 @@
           </div>
 
           <div class="flex gap-3 pt-2">
-            <button id="calc-btn" class="btn-primary flex-1">
+            <button id="calc-btn" class="btn-primary flex-1" type="button">
               <i class="fa-solid fa-calculator"></i>
               Calculate
             </button>
-            <button id="reset-btn" class="btn-secondary">
+            <button id="reset-btn" class="btn-secondary" type="button">
               <i class="fa-solid fa-rotate-left"></i>
               Reset
             </button>
@@ -716,29 +716,29 @@
   <div class="panel">
     <div class="flex flex-wrap justify-between items-center border-b border-slate-200 bg-slate-50">
       <div class="flex">
-        <button class="tab-button active" data-tab="latex">
+        <button class="tab-button active" data-tab="latex" type="button">
           <i class="fa-solid fa-square-root-variable mr-2"></i>
           LaTeX Equations
         </button>
-        <button class="tab-button" data-tab="word">
+        <button class="tab-button" data-tab="word" type="button">
           <i class="fa-solid fa-file-word mr-2"></i>
           Word Package
         </button>
       </div>
       <div class="p-2 flex flex-wrap gap-2">
-        <button id="download-pdf-btn" class="btn-secondary text-xs">
+        <button id="download-pdf-btn" class="btn-secondary text-xs" type="button">
           <i class="fa-solid fa-file-pdf text-red-600"></i> PDF
         </button>
-        <button id="download-excel-btn" class="btn-secondary text-xs">
+        <button id="download-excel-btn" class="btn-secondary text-xs" type="button">
           <i class="fa-solid fa-file-excel text-green-600"></i> Excel
         </button>
-        <button id="download-dxf-btn" class="btn-secondary text-xs">
+        <button id="download-dxf-btn" class="btn-secondary text-xs" type="button">
           <i class="fa-solid fa-file-code text-blue-600"></i> DXF
         </button>
-        <button id="download-md-btn" class="btn-secondary text-xs">
+        <button id="download-md-btn" class="btn-secondary text-xs" type="button">
           <i class="fa-brands fa-markdown text-slate-700"></i> Markdown
         </button>
-        <button id="download-txt-btn" class="btn-secondary text-xs">
+        <button id="download-txt-btn" class="btn-secondary text-xs" type="button">
           <i class="fa-solid fa-file-lines text-slate-700"></i> TXT
         </button>
       </div>
@@ -753,7 +753,7 @@
             <h3 class="font-serif text-lg font-bold text-slate-800">Complete Calculation Package</h3>
             <p class="text-xs text-slate-500 mt-0.5">All equations rendered in LaTeX with substituted values</p>
           </div>
-          <button id="copy-latex-btn" class="btn-secondary text-xs">
+          <button id="copy-latex-btn" class="btn-secondary text-xs" type="button">
             <i class="fa-solid fa-copy"></i>
             Copy LaTeX Source
           </button>
@@ -768,7 +768,7 @@
             <h3 class="font-serif text-lg font-bold text-slate-800">Calculation Package — Word Ready</h3>
             <p class="text-xs text-slate-500 mt-0.5">Plain-text format — copy directly into MS Word</p>
           </div>
-          <button id="copy-word-btn" class="btn-secondary text-xs">
+          <button id="copy-word-btn" class="btn-secondary text-xs" type="button">
             <i class="fa-solid fa-copy"></i>
             Copy Text
           </button>
@@ -839,6 +839,8 @@
 </div>
 
 <script>
+console.log("Script is loading...");
+
 // ====================================
 //  BAR DATA
 // ====================================
@@ -1162,6 +1164,7 @@ function calculate() {
     date: document.getElementById('proj-date').value || '',
     engineer: document.getElementById('proj-eng').value || '',
     aciVersion, barSize, db, barArea, fy, fc, isMetric, unitSystem: currentUnitSystem,
+    coating,  // <-- FIX: added coating to data object
     psiT, psiTReason, psiE, psiEReason, psiE_adj, productLimited, productPsi,
     psiS, psiSReason, psiG, psiGReason, lambda, lambdaReason,
     clearCover, clearSpacing, cb1, cb2, cb, cbGoverns,
@@ -1656,9 +1659,61 @@ function generateMarkdown(d) {
 }
 
 // ====================================
+//  EXCEL EXPORT (FIXED - NO SYNTAX ERRORS)
+// ====================================
+function exportToExcel() {
+  const wb = XLSX.utils.book_new();
+  const data = window._lastCalcData;
+  
+  if (!data) {
+    showToast('Please calculate first');
+    return;
+  }
+  
+  const wsData = [
+    ['Project Name:', data.projectName || ''],
+    ['Calculation Item:', data.calcItem || ''],
+    ['Date:', data.date || ''],
+    ['Engineer:', data.engineer || ''],
+    ['ACI Code:', data.aciVersion || ''],
+    ['Unit System:', data.unitSystem || ''],
+    [],
+    ['Parameter', 'Symbol', 'Value', 'Unit', 'Formula/Notes']
+  ];
+  
+  if (data.inputs) {
+    wsData.push(['Bar Size', 'db', data.inputs.barSize, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
+    wsData.push(['Yield Strength', 'fy', data.inputs.fy, data.unitSystem === 'imperial' ? 'psi' : 'MPa', '']);
+    wsData.push(['Concrete Strength', "f'c", data.inputs.fc, data.unitSystem === 'imperial' ? 'psi' : 'MPa', '']);
+    wsData.push(['Cover', 'c', data.inputs.cover, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
+    wsData.push(['Spacing', 's', data.inputs.spacing, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
+    wsData.push(['Coating Factor', 'ψe', data.inputs.coatingFactor || 1.0, '', '1.0 uncoated, 1.5 epoxy']);
+    wsData.push(['Location Factor', 'ψt', data.inputs.locationFactor || 1.0, '', '1.0 not top cast, 1.3 top cast']);
+    wsData.push(['Size Factor', 'λ', data.inputs.sizeFactor || 1.0, '', '1.0 normal weight']);
+    wsData.push([]);
+  }
+  
+  const unitL = data.unitSystem === 'imperial' ? 'in' : 'mm';
+  wsData.push(['Tension Development Length', 'ld', data.ld, unitL, '=MAX((3*fy*ψe*ψt*ψs)/(40*√f\'c*λ)*(db/(c+Ktr)),12in)']);
+  wsData.push(['Compression Development', 'ldc', data.ldc, unitL, '=MAX(0.02*fy*db/√f\'c,0.0003*fy*db,8in)']);
+  wsData.push(['Class A Splice', 'lsA', data.lsClassA_final, unitL, '=1.0*ld']);
+  wsData.push(['Class B Splice', 'lsB', data.lsClassB_final, unitL, '=1.3*ld']);
+  wsData.push(['Hook Development', 'ldh', (data.hookType === 'straight' ? 'N/A' : data.ldh), unitL, '=0.02*ψe*ψc*ψr*fy*db/√f\'c']);
+  wsData.push(['Headed Bar', 'ldt', data.ldhHead, unitL, '=0.016*ψe*fy*db/√f\'c']);
+  
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols'] = [{ wch: 25 }, { wch: 10 }, { wch: 12 }, { wch: 8 }, { wch: 45 }];
+  
+  XLSX.utils.book_append_sheet(wb, ws, 'Calculation');
+  XLSX.writeFile(wb, 'rebar_calculation.xlsx');
+  showToast('Excel Downloaded');
+}
+
+// ====================================
 //  INITIALIZATION
 // ====================================
 document.addEventListener('DOMContentLoaded', function() {
+  console.log("DOM fully loaded. Initializing app...");
   try {
     loadInputs();
     updateUnitUI();
@@ -1669,6 +1724,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.getElementById('calc-btn').addEventListener('click', function() {
+      console.log("Calculate button clicked!");
       try {
         calculate();
         showToast('Calculations updated');
@@ -1715,7 +1771,6 @@ document.addEventListener('DOMContentLoaded', function() {
       navigator.clipboard.writeText(document.getElementById('word-output').value).then(() => showToast('Calculation package copied'));
     });
 
-    // Export Buttons
     document.getElementById('download-pdf-btn').addEventListener('click', function() {
       const element = document.getElementById('latex-output').cloneNode(true);
       const header = document.createElement('div');
@@ -1737,78 +1792,7 @@ document.addEventListener('DOMContentLoaded', function() {
       showToast('PDF Downloaded');
     });
 
-    document.getElementById('download-excel-btn').addEventListener('click', function() {
-      exportToExcel();
-    });
-
-    function exportToExcel() {
-      const wb = XLSX.utils.book_new();
-      const data = window._lastCalcData;
-      
-      // Project info rows (unlocked for editing)
-      const wsData = [
-        ['Project Name:', data.projectName || ''],
-        ['Calculation Item:', data.calcItem || ''],
-        ['Date:', data.date || ''],
-        ['Engineer:', data.engineer || ''],
-        ['ACI Code:', data.aciVersion || ''],
-        ['Unit System:', data.unitSystem || ''],
-        [],
-        // Headers for calculation data
-        ['Parameter', 'Symbol', 'Value', 'Unit', 'Formula/Notes']
-      ];
-      
-      // Add input parameters
-      if (data.inputs) {
-        wsData.push(['Bar Size', 'db', data.inputs.barSize, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
-        wsData.push(['Yield Strength', 'fy', data.inputs.fy, 'psi', '']);
-        wsData.push(['Concrete Strength', "f'c", data.inputs.fc, 'psi', '']);
-        wsData.push(['Cover', 'c', data.inputs.cover, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
-        wsData.push(['Spacing', 's', data.inputs.spacing, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
-        wsData.push(['Coating Factor', 'ψe', data.inputs.coatingFactor || 1.0, '', '1.0 uncoated, 1.5 epoxy');
-        wsData.push(['Location Factor', 'ψt', data.inputs.locationFactor || 1.0, '', '1.0 top bar, 1.3 bottom');
-        wsData.push(['Size Factor', 'λ', data.inputs.sizeFactor || 1.0, '', '1.0 normal weight');
-        wsData.push([]);
-      }
-      
-      // Add results with formulas
-      if (data.results) {
-        wsData.push(['Tension Development Length', 'ld', data.results.ld, data.unitSystem === 'imperial' ? 'in' : 'mm', '=MAX((3*fy*ψe*ψt*ψs)/(40*√f\'c*λ)*(db/(c+Ktr)),12in)']);
-        wsData.push(['Compression Development', 'ldc', data.results.ldc, data.unitSystem === 'imperial' ? 'in' : 'mm', '=MAX(0.02*fy*db/√f\'c,0.0003*fy*db,8in)']);
-        wsData.push(['Class A Splice', 'lsA', data.results.lsA, data.unitSystem === 'imperial' ? 'in' : 'mm', '=1.0*ld']);
-        wsData.push(['Class B Splice', 'lsB', data.results.lsB, data.unitSystem === 'imperial' ? 'in' : 'mm', '=1.3*ld']);
-        wsData.push(['Hook Development', 'ldh', data.results.ldh, data.unitSystem === 'imperial' ? 'in' : 'mm', '=0.02*ψe*ψc*ψr*fy*db/√f\'c']);
-        wsData.push(['Headed Bar', 'ldt', data.results.ldt, data.unitSystem === 'imperial' ? 'in' : 'mm', '=0.016*ψe*fy*db/√f\'c']);
-      }
-      
-      const ws = XLSX.utils.aoa_to_sheet(wsData);
-      
-      // Set column widths
-      ws['!cols'] = [
-        { wch: 25 },
-        { wch: 10 },
-        { wch: 12 },
-        { wch: 8 },
-        { wch: 45 }
-      ];
-      
-      // Protect sheet but leave first 6 rows unlocked
-      ws['!protect'] = { password: '', selectLockedCells: true, selectUnlockedCells: true };
-      
-      // Mark first 6 rows as unlocked
-      for (let row = 0; row < 6; row++) {
-        const range = XLSX.utils.decode_range(ws['!ref']);
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
-          if (!ws[cellRef]) continue;
-          ws[cellRef].locked = false;
-        }
-      }
-      
-      XLSX.utils.book_append_sheet(wb, ws, 'Calculation');
-      XLSX.writeFile(wb, 'rebar_calculation.xlsx');
-      showToast('Excel Downloaded');
-    }
+    document.getElementById('download-excel-btn').addEventListener('click', exportToExcel);
 
     document.getElementById('download-dxf-btn').addEventListener('click', function() {
       const dxfContent = generateDXF(window._lastCalcData);
@@ -1835,11 +1819,14 @@ document.addEventListener('DOMContentLoaded', function() {
     function autoCalc() {
       if (window.MathJax && MathJax.typesetPromise) {
         calculate();
+        console.log("Initial calculation complete.");
       } else {
         setTimeout(autoCalc, 200);
       }
     }
     autoCalc();
+    
+    console.log("Initialization complete. Buttons should be active.");
     
   } catch (err) {
     console.error("Initialization Error:", err);
