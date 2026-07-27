@@ -1154,7 +1154,11 @@ function calculate() {
 
   // Build Outputs
   const data = {
-    aciVersion, barSize, db, barArea, fy, fc, isMetric,
+    projectName: document.getElementById('proj-name').value || '',
+    calcItem: document.getElementById('proj-item').value || '',
+    date: document.getElementById('proj-date').value || '',
+    engineer: document.getElementById('proj-eng').value || '',
+    aciVersion, barSize, db, barArea, fy, fc, isMetric, unitSystem: currentUnitSystem,
     psiT, psiTReason, psiE, psiEReason, psiE_adj, productLimited, productPsi,
     psiS, psiSReason, psiG, psiGReason, lambda, lambdaReason,
     clearCover, clearSpacing, cb1, cb2, cb, cbGoverns,
@@ -1166,7 +1170,17 @@ function calculate() {
     fy_le_60k: fy <= fy_limit, lscRaw, lscFormula, lscMultiplier, lscMin, lsc,
     hookType, psiE_hook, psiR_hook, ldhRaw, ldhMin1, ldhMin2, ldhMin, ldh, ldhMinGoverns,
     psiE_head, psiP_head, Rb, ldhHeadRaw, ldhHeadMin, ldhHeadCapped, ldhHead, ldhHeadGoverns,
-    calcMethod, bundledBars, db_eq, bundleMult, coeff
+    calcMethod, bundledBars, db_eq, bundleMult, coeff,
+    inputs: {
+      barSize: barSize,
+      fy: fy,
+      fc: fc,
+      cover: clearCover,
+      spacing: clearSpacing,
+      coatingFactor: (coating === 'epoxy') ? 1.5 : 1.0,
+      locationFactor: (barLocation === 'top') ? 1.3 : 1.0,
+      sizeFactor: lambda
+    }
   };
 
   // Save data globally for export buttons
