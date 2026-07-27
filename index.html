@@ -3,24 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rebar Development Length Calculator — ACI 318 | Structural Engineering Tool</title>
+<title>Structural Engineering & Design Tools | Rittik Bhowmik</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Roboto+Slab:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Roboto+Slab:wght@400;500;600;700;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<script>
-  MathJax = {
-    tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
-    chtml: { scale: 1.05 },
-    startup: { typeset: false }
-  };
-</script>
-<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
 
 <style>
   :root {
@@ -32,1803 +21,262 @@
     --accent-3: #b45309;
     --steel: #475569;
     --steel-light: #94a3b8;
-    --bg: #f1f5f9;
+    --bg: #f8fafc;
     --paper: #ffffff;
     --line: #cbd5e1;
-    --line-light: #e2e8f0;
     --text: #0f172a;
-    --muted: #475569;
-    --success: #059669;
-    --warning: #d97706;
-    --danger: #dc2626;
+    --muted: #64748b;
   }
+  
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
   body {
     font-family: 'Inter', sans-serif;
     color: var(--text);
     background-color: var(--bg);
-    background-image:
-      linear-gradient(rgba(10,37,64,0.025) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(10,37,64,0.025) 1px, transparent 1px);
-    background-size: 32px 32px;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
   }
   .font-serif { font-family: 'Roboto Slab', serif; }
-  .font-mono { font-family: 'JetBrains Mono', monospace; }
-
-  .site-header {
-    background: linear-gradient(135deg, #0a2540 0%, #14365e 100%);
-    color: white;
-    border-bottom: 4px solid var(--accent);
+  
+  .hero-gradient {
+    background: linear-gradient(135deg, #0a2540 0%, #14365e 50%, #1e4a7a 100%);
     position: relative;
     overflow: hidden;
   }
-  .site-header::before {
+  .hero-gradient::before {
     content: '';
     position: absolute; inset: 0;
-    background-image:
-      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-    background-size: 24px 24px;
+    background-image: 
+      linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
     pointer-events: none;
   }
-  .header-badge {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 4px 10px;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 3px;
-    font-size: 12px; font-weight: 500;
-    color: rgba(255,255,255,0.9);
-  }
-
-  .input-label {
-    display: block;
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 5px;
-  }
-  .input-field {
-    width: 100%;
-    padding: 9px 12px;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    background: white;
-    font-size: 14px;
-    font-family: 'JetBrains Mono', monospace;
-    color: var(--text);
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  .input-field:focus {
-    outline: none;
-    border-color: var(--primary-3);
-    box-shadow: 0 0 0 3px rgba(30,74,122,0.12);
-  }
-  select.input-field {
-    appearance: none;
-    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right: 32px;
-    font-size: 13px;
-  }
-
-  .btn-primary {
-    background: var(--accent); color: white;
-    font-weight: 600;
-    padding: 11px 22px;
-    border-radius: 4px; border: none;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.05s, box-shadow 0.15s;
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    letter-spacing: 0.02em;
-    box-shadow: 0 1px 3px rgba(217,119,6,0.3);
-  }
-  .btn-primary:hover { background: var(--accent-3); box-shadow: 0 2px 6px rgba(217,119,6,0.4); }
-  .btn-primary:active { transform: translateY(1px); }
-  .btn-secondary {
-    background: white; color: var(--primary);
-    font-weight: 600;
-    padding: 9px 16px;
-    border-radius: 4px; border: 1px solid var(--line);
-    cursor: pointer;
-    transition: all 0.15s;
-    display: inline-flex; align-items: center; gap: 6px;
-  }
-  .btn-secondary:hover { border-color: var(--primary-3); background: #f8fafc; }
-
-  .panel {
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    overflow: hidden;
-    box-shadow: 0 1px 2px rgba(15,23,42,0.04);
-  }
-  .panel-header {
-    background: var(--primary); color: white;
-    padding: 11px 18px;
-    font-size: 12px; font-weight: 700;
-    letter-spacing: 0.08em; text-transform: uppercase;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .panel-header.steel { background: var(--steel); }
-  .panel-body { padding: 22px; }
-
-  .summary-card {
-    background: white;
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 18px;
-    position: relative;
-    overflow: hidden;
-    transition: border-color 0.15s, box-shadow 0.15s;
-  }
-  .summary-card:hover { border-color: var(--primary-3); box-shadow: 0 2px 8px rgba(15,23,42,0.08); }
-  .summary-card::before {
+  .hero-gradient::after {
     content: '';
     position: absolute;
-    top: 0; left: 0; width: 4px; height: 100%;
-    background: var(--card-accent, var(--primary));
+    top: -50%; right: -20%;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(217,119,6,0.15) 0%, transparent 70%);
+    pointer-events: none;
   }
-  .summary-card .card-label {
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--muted); margin-bottom: 4px;
-  }
-  .summary-card .card-symbol {
-    font-family: 'Roboto Slab', serif;
-    font-size: 12px; color: var(--muted);
-    margin-bottom: 6px;
-  }
-  .summary-card .card-value {
-    font-family: 'Roboto Slab', serif;
-    font-size: 28px; font-weight: 700;
-    color: var(--primary); line-height: 1;
-  }
-  .summary-card .card-unit {
-    font-size: 13px; color: var(--muted); margin-left: 4px;
-  }
-  .summary-card .card-ref {
-    font-size: 10px; color: var(--steel-light);
-    margin-top: 6px; font-family: 'JetBrains Mono', monospace;
-  }
-
-  .calc-section {
-    margin-bottom: 32px;
-    padding-bottom: 28px;
-    border-bottom: 1px solid var(--line-light);
-  }
-  .calc-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-  .calc-section-title {
-    font-family: 'Roboto Slab', serif;
-    font-size: 16px; font-weight: 700;
-    color: var(--primary);
-    margin-bottom: 16px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--accent);
-    display: flex; align-items: center; gap: 10px;
-  }
-  .calc-step { margin-bottom: 18px; }
-  .calc-step:last-child { margin-bottom: 0; }
-  .step-label {
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    color: var(--steel); margin-bottom: 6px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .step-label::before {
-    content: '';
-    width: 6px; height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-  }
-  .result-box {
-    background: #f0fdf4;
-    border: 2px solid #86efac;
-    border-radius: 4px;
-    padding: 12px 18px;
-    margin-top: 12px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .result-box .result-icon {
-    width: 28px; height: 28px;
-    background: var(--success); color: white;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px;
-  }
-
-  mjx-container { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
-  mjx-container[display="true"] { margin: 6px 0 !important; }
-
-  .copy-textarea {
-    width: 100%;
-    min-height: 600px;
-    padding: 20px;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11.5px;
-    line-height: 1.65;
-    background: #fafbfc;
-    color: #1e293b;
-    resize: vertical;
-    white-space: pre;
-    overflow-x: auto;
-  }
-
-  .tab-button {
-    padding: 12px 22px;
-    border: none; background: transparent;
-    color: var(--muted);
-    font-weight: 600; font-size: 13px;
-    cursor: pointer;
-    transition: all 0.15s;
-    letter-spacing: 0.03em;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -1px;
-  }
-  .tab-button.active { color: var(--primary); border-bottom-color: var(--accent); }
-  .tab-button:hover:not(.active) { color: var(--primary); background: #f8fafc; }
-
-  .toast {
-    position: fixed;
-    bottom: 28px; right: 28px;
-    background: var(--primary); color: white;
-    padding: 13px 22px;
-    border-radius: 6px;
-    box-shadow: 0 10px 30px rgba(10,37,64,0.3);
-    transform: translateY(150%);
-    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
-    z-index: 1000;
-    display: flex; align-items: center; gap: 10px;
-    font-weight: 500; font-size: 13px;
-  }
-  .toast.show { transform: translateY(0); }
-
-  .check-box {
-    width: 16px; height: 16px;
-    border: 1.5px solid var(--steel-light);
-    border-radius: 3px;
-    cursor: pointer;
-    accent-color: var(--primary);
-  }
-
-  .section-divider {
-    font-size: 10px; font-weight: 700;
-    letter-spacing: 0.12em; text-transform: uppercase;
-    color: var(--steel);
-    margin: 16px 0 12px;
-    padding-bottom: 6px;
-    border-bottom: 1px solid var(--line-light);
-    display: flex; align-items: center; gap: 8px;
-  }
-  .section-divider::before {
-    content: ''; width: 3px; height: 12px; background: var(--accent);
-  }
-
-  ::-webkit-scrollbar { width: 10px; height: 10px; }
-  ::-webkit-scrollbar-track { background: #f1f5f9; }
-  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-  ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .fade-up { animation: fadeUp 0.4s ease-out; }
-
-  .unit-toggle {
-    display: flex;
-    background: #f1f5f9;
-    border: 1px solid var(--line);
-    border-radius: 4px;
+  
+  .tool-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+    transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
     overflow: hidden;
   }
-  .unit-toggle button {
-    flex: 1;
-    padding: 8px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    font-family: 'JetBrains Mono', monospace;
-    font-weight: 600;
-    font-size: 12px;
-    color: var(--muted);
-    transition: all 0.15s;
+  .tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+    border-color: var(--accent);
   }
-  .unit-toggle button.active {
-    background: var(--primary);
+  .tool-icon {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-2) 100%);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
     color: white;
+    font-size: 28px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+  }
+  .tool-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    background: rgba(217,119,6,0.1);
+    color: var(--accent);
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .footer-gradient {
+    background: linear-gradient(135deg, #0a2540 0%, #14365e 100%);
   }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header class="site-header">
-  <div class="max-w-7xl mx-auto px-6 py-6 relative z-10">
-    <div class="flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <div class="w-14 h-14 bg-white/10 border border-white/20 rounded flex items-center justify-center relative">
-          <i class="fa-solid fa-ruler-combined text-2xl text-amber-400"></i>
-          <span class="absolute -top-1 -right-1 w-3 h-3 bg-amber-400 rounded-full"></span>
-        </div>
-        <div>
-          <div class="text-[10px] uppercase tracking-[0.2em] text-amber-400 font-bold mb-1">Structural Engineering Calculator</div>
-          <h1 class="font-serif text-2xl md:text-3xl font-bold leading-tight">Rebar Development &amp; Splice Length</h1>
-          <div class="text-xs text-white/60 mt-0.5 font-mono">Per ACI 318 — Tension, Compression, Hooks &amp; Heads</div>
-        </div>
+<!-- Header -->
+<header class="hero-gradient text-white py-16">
+  <div class="max-w-6xl mx-auto px-6 relative z-10">
+    <div class="flex items-center gap-3 mb-6">
+      <div class="w-12 h-12 bg-white/10 backdrop-blur-sm rounded-lg flex items-center justify-content-center border border-white/20">
+        <i class="fas fa-calculator text-xl"></i>
       </div>
-      <div class="hidden md:flex flex-col items-end gap-2">
-        <div class="flex items-center gap-2">
-          <span class="header-badge"><i class="fa-solid fa-book text-amber-400"></i> ACI 318-19</span>
-          <span class="header-badge"><i class="fa-solid fa-book text-amber-400"></i> ACI 318-14</span>
-          <span class="header-badge"><i class="fa-solid fa-book text-amber-400"></i> ACI 318-11</span>
-        </div>
-        <div class="text-[10px] text-white/50 font-mono">§25.4 — Development &amp; Splices</div>
+      <div>
+        <h1 class="text-2xl font-bold font-serif">Rittik Bhowmik</h1>
+        <p class="text-sm text-white/80">Structural Engineering & Design Tools</p>
       </div>
+    </div>
+    
+    <div class="mt-10">
+      <h2 class="text-4xl md:text-5xl font-bold font-serif mb-4">
+        Professional Engineering<br/>Calculators & Tools
+      </h2>
+      <p class="text-lg text-white/80 max-w-2xl leading-relaxed">
+        Free, accurate, and code-compliant structural engineering tools designed for practicing engineers. 
+        Built on ACI 318 standards with professional PDF and Excel export capabilities.
+      </p>
     </div>
   </div>
 </header>
 
-<!-- SUBHEADER -->
-<section class="bg-white border-b border-slate-200">
-  <div class="max-w-7xl mx-auto px-6 py-3 flex flex-wrap items-center justify-between gap-3">
-    <p class="text-sm text-slate-600 max-w-3xl">
-      Calculates development &amp; splice lengths with full LaTeX equations and a copy-ready calculation package.
-    </p>
-    <div class="flex items-center gap-4 text-xs text-slate-500">
-      <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></span> Live calc</span>
-      <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> LaTeX</span>
-      <span class="flex items-center gap-1.5"><span class="w-1.5 h-1.5 bg-amber-500 rounded-full"></span> Word-ready</span>
+<!-- Main Content -->
+<main class="max-w-6xl mx-auto px-6 py-16">
+  
+  <!-- Tools Section -->
+  <section class="mb-16">
+    <div class="flex items-center gap-3 mb-8">
+      <div class="w-1 h-8 bg-[var(--accent)] rounded-full"></div>
+      <div>
+        <h3 class="text-2xl font-bold font-serif">Available Tools</h3>
+        <p class="text-[var(--muted)]">Professional calculators for structural design</p>
+      </div>
     </div>
-  </div>
-</section>
-
-<!-- MAIN -->
-<main class="max-w-7xl mx-auto px-6 py-8">
-
-  <!-- Project Info -->
-  <section class="panel mb-6">
-    <div class="panel-header">
-      <i class="fa-solid fa-folder-open"></i>
-      Project Information
-    </div>
-    <div class="panel-body py-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div>
-          <label class="input-label">Project Name</label>
-          <input type="text" id="proj-name" class="input-field" value="Sample Project">
+    
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Tool Card 1: Rebar Development Length -->
+      <a href="tools/rebar-development-length/" class="tool-card group">
+        <div class="p-6">
+          <div class="flex items-start justify-between mb-4">
+            <div class="tool-icon">
+              <i class="fas fa-ruler-vertical"></i>
+            </div>
+            <span class="tool-badge">ACI 318</span>
+          </div>
+          
+          <h4 class="text-xl font-bold mb-2 group-hover:text-[var(--accent)] transition-colors">
+            Rebar Development Length Calculator
+          </h4>
+          <p class="text-[var(--muted)] text-sm leading-relaxed mb-4">
+            Calculate tension and compression development lengths for reinforcing bars per ACI 318-19. 
+            Includes splice calculations and code compliance checks.
+          </p>
+          
+          <div class="flex items-center gap-2 text-sm text-[var(--primary)] font-medium">
+            <span>Launch Tool</span>
+            <i class="fas fa-arrow-right transform group-hover:translate-x-1 transition-transform"></i>
+          </div>
         </div>
-        <div>
-          <label class="input-label">Calculation Item</label>
-          <input type="text" id="proj-item" class="input-field" value="Beam B-1 Main Rebar">
+        
+        <div class="px-6 py-3 bg-gray-50 border-t border-gray-100 flex items-center justify-between">
+          <span class="text-xs text-[var(--muted)]">PDF & Excel Export</span>
+          <i class="fas fa-download text-xs text-[var(--muted)]"></i>
         </div>
-        <div>
-          <label class="input-label">Date</label>
-          <input type="date" id="proj-date" class="input-field">
-        </div>
-        <div>
-          <label class="input-label">Engineer</label>
-          <input type="text" id="proj-eng" class="input-field" value="Rittik Bhowmik, P.E.">
+      </a>
+      
+      <!-- More Tools Coming Soon Placeholder -->
+      <div class="tool-card opacity-60">
+        <div class="p-6">
+          <div class="flex items-start justify-between mb-4">
+            <div class="w-16 h-16 bg-gray-200 rounded-12 flex items-center justify-center">
+              <i class="fas fa-plus text-2xl text-gray-400"></i>
+            </div>
+            <span class="tool-badge" style="background: rgba(100,116,139,0.1); color: var(--muted);">Coming Soon</span>
+          </div>
+          
+          <h4 class="text-xl font-bold mb-2 text-gray-400">
+            More Tools
+          </h4>
+          <p class="text-gray-400 text-sm leading-relaxed mb-4">
+            Additional structural engineering calculators are under development. 
+            Check back soon for new additions.
+          </p>
         </div>
       </div>
     </div>
   </section>
-
-  <!-- Calculator Grid -->
-  <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
-
-    <!-- INPUTS -->
-    <div class="lg:col-span-2">
-      <div class="panel">
-        <div class="panel-header">
-          <i class="fa-solid fa-sliders"></i>
-          Design Parameters
-        </div>
-        <div class="panel-body space-y-4">
-
-          <!-- Unit System Toggle -->
-          <div>
-            <label class="input-label">Unit System</label>
-            <div class="unit-toggle" id="unit-toggle">
-              <button class="active" data-unit="imperial">Imperial (in, psi)</button>
-              <button data-unit="metric">Metric (mm, MPa)</button>
-            </div>
-          </div>
-
-          <div>
-            <label class="input-label">ACI Code Edition</label>
-            <select id="aci-version" class="input-field">
-              <option value="318-19">ACI 318-19</option>
-              <option value="318-14">ACI 318-14</option>
-              <option value="318-11">ACI 318-11</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="input-label">Bar Size</label>
-            <select id="bar-size-imperial" class="input-field">
-              <option value="3">#3 — db = 0.375 in</option>
-              <option value="4">#4 — db = 0.500 in</option>
-              <option value="5">#5 — db = 0.625 in</option>
-              <option value="6" selected>#6 — db = 0.750 in</option>
-              <option value="7">#7 — db = 0.875 in</option>
-              <option value="8">#8 — db = 1.000 in</option>
-              <option value="9">#9 — db = 1.128 in</option>
-              <option value="10">#10 — db = 1.270 in</option>
-              <option value="11">#11 — db = 1.410 in</option>
-              <option value="14">#14 — db = 1.693 in</option>
-              <option value="18">#18 — db = 2.257 in</option>
-            </select>
-            <select id="bar-size-metric" class="input-field hidden">
-              <option value="10M">10M — db = 11.3 mm</option>
-              <option value="15M">15M — db = 16.0 mm</option>
-              <option value="20M" selected>20M — db = 19.5 mm</option>
-              <option value="25M">25M — db = 25.2 mm</option>
-              <option value="30M">30M — db = 29.9 mm</option>
-              <option value="35M">35M — db = 35.7 mm</option>
-              <option value="45M">45M — db = 43.7 mm</option>
-              <option value="55M">55M — db = 56.4 mm</option>
-            </select>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="input-label">fy (<span class="unit-stress">psi</span>)</label>
-              <select id="fy-imperial" class="input-field">
-                <option value="40000">40,000</option>
-                <option value="50000">50,000</option>
-                <option value="60000" selected>60,000</option>
-                <option value="75000">75,000</option>
-                <option value="80000">80,000</option>
-                <option value="100000">100,000</option>
-                <option value="120000">120,000</option>
-              </select>
-              <input type="number" id="fy-metric" class="input-field hidden" value="400" min="100" step="10">
-            </div>
-            <div>
-              <label class="input-label">f'c (<span class="unit-stress">psi</span>)</label>
-              <input type="number" id="fc-imperial" class="input-field" value="4000" min="1000" step="100">
-              <input type="number" id="fc-metric" class="input-field hidden" value="28" min="10" step="1">
-            </div>
-          </div>
-
-          <div class="section-divider">Modification Factors</div>
-
-          <div>
-            <label class="input-label">Bar Location (ψt)</label>
-            <select id="bar-location" class="input-field">
-              <option value="top">Top cast — &gt; 12 in concrete below</option>
-              <option value="other" selected>Other — not top cast</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="input-label">Coating (ψe)</label>
-            <select id="coating" class="input-field">
-              <option value="uncoated" selected>Uncoated (black bar)</option>
-              <option value="epoxy">Epoxy-coated</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="input-label">Concrete Unit Weight (λ)</label>
-            <select id="concrete-type" class="input-field">
-              <option value="normal" selected>Normal weight</option>
-              <option value="sand-lw">Sand-lightweight</option>
-              <option value="all-lw">All-lightweight</option>
-            </select>
-          </div>
-
-          <div class="section-divider">Geometry &amp; Confinement</div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="input-label">Clear Cover (<span class="unit-len">in</span>)</label>
-              <input type="number" id="clear-cover" class="input-field" value="1.5" min="0" step="0.25">
-            </div>
-            <div>
-              <label class="input-label">Clear Spacing (<span class="unit-len">in</span>)</label>
-              <input type="number" id="clear-spacing" class="input-field" value="2.0" min="0" step="0.25">
-            </div>
-          </div>
-
-          <div class="p-3 bg-slate-50 rounded border border-slate-200">
-            <label class="flex items-center gap-2 cursor-pointer">
-              <input type="checkbox" id="has-transverse" class="check-box" checked>
-              <span class="text-sm font-medium text-slate-700">Include transverse reinforcement (Ktr)</span>
-            </label>
-            <div id="transverse-fields" class="mt-3 grid grid-cols-3 gap-2">
-              <div>
-                <label class="input-label">Atr (<span class="unit-area">in²</span>)</label>
-                <input type="number" id="atr" class="input-field" value="0.11" min="0" step="0.01">
-              </div>
-              <div>
-                <label class="input-label">s (<span class="unit-len">in</span>)</label>
-                <input type="number" id="s-trans" class="input-field" value="6" min="0.5" step="0.5">
-              </div>
-              <div>
-                <label class="input-label">n (bars)</label>
-                <input type="number" id="n-bars" class="input-field" value="1" min="1" step="1">
-              </div>
-            </div>
-          </div>
-
-          <div class="section-divider">Advanced Options</div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="input-label">Bundled Bars</label>
-              <select id="bundled-bars" class="input-field">
-                <option value="1" selected>None (Single Bar)</option>
-                <option value="2">2-Bar Bundle</option>
-                <option value="3">3-Bar Bundle (1.2x ℓd)</option>
-                <option value="4">4-Bar Bundle (1.33x ℓd)</option>
-              </select>
-            </div>
-            <div>
-              <label class="input-label">Calculation Method</label>
-              <select id="calc-method" class="input-field">
-                <option value="detailed" selected>Detailed (Eq. 25.4.2.2a)</option>
-                <option value="simplified">Simplified (Sec. 25.4.2.2)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="section-divider">Hook &amp; Head Options</div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="input-label">Hook Type</label>
-              <select id="hook-type" class="input-field">
-                <option value="straight">Straight Bar (No Hook)</option>
-                <option value="90" selected>90° Standard Hook</option>
-                <option value="180">180° Standard Hook</option>
-              </select>
-            </div>
-            <div>
-              <label class="input-label">Hook Confinement (ψr)</label>
-              <select id="hook-confinement" class="input-field">
-                <option value="1.0" selected>No confinement — ψr = 1.0</option>
-                <option value="0.75">Confined — ψr = 0.75</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="flex gap-3 pt-2">
-            <button id="calc-btn" class="btn-primary flex-1">
-              <i class="fa-solid fa-calculator"></i>
-              Calculate
-            </button>
-            <button id="reset-btn" class="btn-secondary">
-              <i class="fa-solid fa-rotate-left"></i>
-              Reset
-            </button>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- SUMMARY CARDS -->
-    <div class="lg:col-span-3">
-      <div class="panel mb-6">
-        <div class="panel-header">
-          <i class="fa-solid fa-square-poll-vertical"></i>
-          Results Summary
-        </div>
-        <div class="panel-body">
-          <div class="grid grid-cols-2 lg:grid-cols-3 gap-4">
-
-            <div class="summary-card" style="--card-accent:#1e4a7a;">
-              <div class="card-label">Tension Development</div>
-              <div class="card-symbol">ℓ<sub>d</sub> — straight bar</div>
-              <div><span class="card-value" id="card-ld">—</span><span class="card-unit unit-len">in</span></div>
-              <div class="card-ref">§25.4.2</div>
-            </div>
-
-            <div class="summary-card" style="--card-accent:#7c3aed;">
-              <div class="card-label">Tension Splice</div>
-              <div class="card-symbol">ℓ<sub>s</sub> — Class B (1.3ℓ<sub>d</sub>)</div>
-              <div><span class="card-value" id="card-ls">—</span><span class="card-unit unit-len">in</span></div>
-              <div class="card-ref">§25.5.2</div>
-            </div>
-
-            <div class="summary-card" style="--card-accent:#059669;">
-              <div class="card-label">Compression Dev.</div>
-              <div class="card-symbol">ℓ<sub>dc</sub> — straight bar</div>
-              <div><span class="card-value" id="card-ldc">—</span><span class="card-unit unit-len">in</span></div>
-              <div class="card-ref">§25.4.9</div>
-            </div>
-
-            <div class="summary-card" style="--card-accent:#0891b2;">
-              <div class="card-label">Compression Splice</div>
-              <div class="card-symbol">ℓ<sub>sc</sub> — lap splice</div>
-              <div><span class="card-value" id="card-lsc">—</span><span class="card-unit unit-len">in</span></div>
-              <div class="card-ref">§25.5.5</div>
-            </div>
-
-            <div class="summary-card" style="--card-accent:#d97706;">
-              <div class="card-label">Hooked Bar Dev.</div>
-              <div class="card-symbol">ℓ<sub>dh</sub> — standard hook</div>
-              <div><span class="card-value" id="card-ldh">—</span><span class="card-unit unit-len">in</span></div>
-              <div class="card-ref">§25.4.3</div>
-            </div>
-
-            <div class="summary-card" style="--card-accent:#dc2626;">
-              <div class="card-label">Headed Bar Dev.</div>
-              <div class="card-symbol">ℓ<sub>dh</sub> — headed bar</div>
-              <div><span class="card-value" id="card-ldh-head">—</span><span class="card-unit unit-len">in</span></div>
-              <div class="card-ref">§25.4.4</div>
-            </div>
-
-          </div>
-        </div>
-      </div>
-
-      <!-- Dynamic Diagram -->
-      <div class="panel mb-6">
-        <div class="panel-header steel">
-          <i class="fa-solid fa-bezier-curve"></i>
-          Section Diagram
-        </div>
-        <div class="panel-body">
-          <svg id="section-diagram" viewBox="0 0 500 200" class="w-full" preserveAspectRatio="xMidYMid meet"></svg>
-        </div>
-      </div>
-
-      <!-- Reference Card -->
-      <div class="panel">
-        <div class="panel-header steel">
-          <i class="fa-solid fa-circle-info"></i>
-          Modification Factor Reference
-        </div>
-        <div class="panel-body text-xs space-y-2 text-slate-600">
-          <div class="grid grid-cols-2 gap-x-6 gap-y-1.5">
-            <div>ψt — top cast (≥12")</div><div class="font-mono text-right">1.3</div>
-            <div>ψe — epoxy (cover &lt; 3db or spacing &lt; 6db)</div><div class="font-mono text-right">1.5</div>
-            <div>ψe — epoxy (other)</div><div class="font-mono text-right">1.2</div>
-            <div>ψs — #6 and smaller</div><div class="font-mono text-right">0.8</div>
-            <div>ψg — fy = 100 ksi</div><div class="font-mono text-right">1.15</div>
-            <div>ψg — fy = 120 ksi</div><div class="font-mono text-right">1.30</div>
-            <div>λ — sand-lightweight</div><div class="font-mono text-right">0.85</div>
-            <div>λ — all-lightweight</div><div class="font-mono text-right">0.75</div>
-            <div>ψr — hook confined</div><div class="font-mono text-right">0.75</div>
-            <div>ψt · ψe product limit</div><div class="font-mono text-right">≤ 1.7</div>
-          </div>
-          <div class="text-[10px] italic text-slate-500 mt-3 pt-2 border-t border-slate-100">
-            Per ACI 318-19 Tables 25.4.2.4, 25.4.3.2 &amp; 25.4.4.2
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- DETAILED CALCULATIONS -->
-  <div class="panel">
-    <div class="flex flex-wrap justify-between items-center border-b border-slate-200 bg-slate-50">
-      <div class="flex">
-        <button class="tab-button active" data-tab="latex">
-          <i class="fa-solid fa-square-root-variable mr-2"></i>
-          LaTeX Equations
-        </button>
-        <button class="tab-button" data-tab="word">
-          <i class="fa-solid fa-file-word mr-2"></i>
-          Word Package
-        </button>
-      </div>
-      <div class="p-2 flex flex-wrap gap-2">
-        <button id="download-pdf-btn" class="btn-secondary text-xs">
-          <i class="fa-solid fa-file-pdf text-red-600"></i> PDF
-        </button>
-        <button id="download-excel-btn" class="btn-secondary text-xs">
-          <i class="fa-solid fa-file-excel text-green-600"></i> Excel
-        </button>
-        <button id="download-dxf-btn" class="btn-secondary text-xs">
-          <i class="fa-solid fa-file-code text-blue-600"></i> DXF
-        </button>
-        <button id="download-md-btn" class="btn-secondary text-xs">
-          <i class="fa-brands fa-markdown text-slate-700"></i> Markdown
-        </button>
-        <button id="download-txt-btn" class="btn-secondary text-xs">
-          <i class="fa-solid fa-file-lines text-slate-700"></i> TXT
-        </button>
-      </div>
-    </div>
-
-    <div class="panel-body">
-
-      <!-- LaTeX Tab -->
-      <div id="tab-latex" class="tab-content">
-        <div class="flex justify-between items-center mb-5">
-          <div>
-            <h3 class="font-serif text-lg font-bold text-slate-800">Complete Calculation Package</h3>
-            <p class="text-xs text-slate-500 mt-0.5">All equations rendered in LaTeX with substituted values</p>
-          </div>
-          <button id="copy-latex-btn" class="btn-secondary text-xs">
-            <i class="fa-solid fa-copy"></i>
-            Copy LaTeX Source
-          </button>
-        </div>
-        <div id="latex-output"></div>
-      </div>
-
-      <!-- Word Tab -->
-      <div id="tab-word" class="tab-content hidden">
-        <div class="flex justify-between items-center mb-3">
-          <div>
-            <h3 class="font-serif text-lg font-bold text-slate-800">Calculation Package — Word Ready</h3>
-            <p class="text-xs text-slate-500 mt-0.5">Plain-text format — copy directly into MS Word</p>
-          </div>
-          <button id="copy-word-btn" class="btn-secondary text-xs">
-            <i class="fa-solid fa-copy"></i>
-            Copy Text
-          </button>
-        </div>
-        <textarea id="word-output" class="copy-textarea" readonly></textarea>
-      </div>
-
-    </div>
-  </div>
-
-  <!-- References -->
-  <section class="panel mt-8">
-    <div class="panel-header steel">
-      <i class="fa-solid fa-book-bookmark"></i>
-      References &amp; Notes
-    </div>
-    <div class="panel-body grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+  
+  <!-- Features Section -->
+  <section class="mb-16">
+    <div class="flex items-center gap-3 mb-8">
+      <div class="w-1 h-8 bg-[var(--accent)] rounded-full"></div>
       <div>
-        <div class="font-serif font-bold text-slate-800 mb-2 flex items-center gap-2">
-          <span class="w-1 h-4 bg-amber-500"></span>
-          ACI 318 Code References
-        </div>
-        <ul class="text-slate-600 space-y-1 text-xs">
-          <li class="flex gap-2"><span class="font-mono text-slate-400">§25.4.2</span> Development of deformed bars in tension</li>
-          <li class="flex gap-2"><span class="font-mono text-slate-400">Eq. 25.4.2.2a</span> General development length equation</li>
-          <li class="flex gap-2"><span class="font-mono text-slate-400">Table 25.4.2.4</span> Modification factors for tension</li>
-          <li class="flex gap-2"><span class="font-mono text-slate-400">§25.4.3</span> Development of hooked bars in tension</li>
-          <li class="flex gap-2"><span class="font-mono text-slate-400">§25.4.4</span> Development of headed bars in tension</li>
-          <li class="flex gap-2"><span class="font-mono text-slate-400">§25.4.9</span> Development of deformed bars in compression</li>
-          <li class="flex gap-2"><span class="font-mono text-slate-400">§25.5.2</span> Tension lap splices (Class A / Class B)</li>
-          <li class="flex gap-2"><span class="font-mono text-slate-400">§25.5.5</span> Compression lap splices</li>
-        </ul>
+        <h3 class="text-2xl font-bold font-serif">Why Use These Tools?</h3>
+        <p class="text-[var(--muted)]">Built for professional engineers</p>
       </div>
-      <div>
-        <div class="font-serif font-bold text-slate-800 mb-2 flex items-center gap-2">
-          <span class="w-1 h-4 bg-amber-500"></span>
-          Calculation Notes
+    </div>
+    
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+        <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
+          <i class="fas fa-book text-[var(--primary)] text-xl"></i>
         </div>
-        <ul class="text-slate-600 space-y-1 text-xs">
-          <li>• Tension splice defaults to Class B (1.3 × ℓd) per §25.5.2.1.</li>
-          <li>• Class A (1.0 × ℓd) applies when ≤ 50% of bars spliced and staggered.</li>
-          <li>• Product ψt · ψe limited to 1.7 per Table 25.4.2.4.</li>
-          <li>• Term (cb + Ktr)/db limited to maximum of 2.5 per §25.4.2.4.</li>
-          <li>• Hooked bar ℓdh per Eq. 25.4.3.2 with ψe, ψr, λ modifiers.</li>
-          <li>• Headed bar ℓdh per Eq. 25.4.4.2(a), requires net bearing area ≥ 4Ab.</li>
-          <li>• Compression splice multiplied by 2.0 when f'c &lt; 3,000 psi.</li>
-          <li>• Bundled bars use equivalent diameter for confinement and multiply final ℓd by 1.2 or 1.33.</li>
-          <li>• Verify all results against the governing building code.</li>
-        </ul>
+        <h4 class="font-bold mb-2">Code Compliant</h4>
+        <p class="text-sm text-[var(--muted)] leading-relaxed">
+          All calculations follow ACI 318-19 building code requirements for structural concrete.
+        </p>
+      </div>
+      
+      <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+        <div class="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center mb-4">
+          <i class="fas fa-file-pdf text-[var(--accent)] text-xl"></i>
+        </div>
+        <h4 class="font-bold mb-2">Professional Export</h4>
+        <p class="text-sm text-[var(--muted)] leading-relaxed">
+          Generate PDF reports and Excel spreadsheets with locked formulas for documentation.
+        </p>
+      </div>
+      
+      <div class="bg-white p-6 rounded-xl border border-gray-100 shadow-sm">
+        <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center mb-4">
+          <i class="fas fa-check-circle text-green-600 text-xl"></i>
+        </div>
+        <h4 class="font-bold mb-2">Free to Use</h4>
+        <p class="text-sm text-[var(--muted)] leading-relaxed">
+          No registration required. Completely free for professional and educational use.
+        </p>
       </div>
     </div>
   </section>
-
+  
+  <!-- About Section -->
+  <section class="bg-white rounded-2xl p-8 border border-gray-100 shadow-sm">
+    <div class="flex items-start gap-6">
+      <div class="w-20 h-20 bg-gradient-to-br from-[var(--primary)] to-[var(--primary-2)] rounded-xl flex items-center justify-center flex-shrink-0">
+        <i class="fas fa-user-engineer text-3xl text-white"></i>
+      </div>
+      <div>
+        <h3 class="text-2xl font-bold font-serif mb-3">About the Developer</h3>
+        <p class="text-[var(--muted)] leading-relaxed mb-4">
+          Hi, I'm <strong>Rittik Bhowmik</strong>, a structural engineer passionate about creating 
+          practical tools that help fellow engineers work more efficiently. These calculators are 
+          built based on real-world needs and rigorous code compliance.
+        </p>
+        <p class="text-[var(--muted)] leading-relaxed">
+          Feel free to use these tools in your daily practice. If you have suggestions for new 
+          calculators or improvements, don't hesitate to reach out.
+        </p>
+      </div>
+    </div>
+  </section>
+  
 </main>
 
-<!-- FOOTER -->
-<footer class="bg-slate-900 text-white/50 text-xs py-6 mt-12 border-t-4 border-amber-500">
-  <div class="max-w-7xl mx-auto px-6 flex flex-wrap justify-between items-center gap-4">
-    <div class="font-mono">Rebar Development &amp; Splice Length Calculator · ACI 318</div>
-    <div class="text-white/30">For professional engineering use. Verify all results against the governing code.</div>
+<!-- Footer -->
+<footer class="footer-gradient text-white py-12 mt-16">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <div>
+        <h4 class="font-bold font-serif text-lg mb-1">Rittik Bhowmik</h4>
+        <p class="text-sm text-white/70">Structural Engineering & Design Tools</p>
+      </div>
+      
+      <div class="flex items-center gap-6 text-sm text-white/70">
+        <span>&copy; 2024 All rights reserved</span>
+        <span class="hidden md:inline">|</span>
+        <span>Built with ❤️ for engineers</span>
+      </div>
+    </div>
   </div>
 </footer>
-
-<!-- Toast -->
-<div id="toast" class="toast">
-  <i class="fa-solid fa-check-circle text-emerald-400"></i>
-  <span id="toast-msg">Copied to clipboard</span>
-</div>
-
-<script>
-// ====================================
-//  BAR DATA
-// ====================================
-const barDataImperial = {
-  '3':  { diameter: 0.375, area: 0.11 },
-  '4':  { diameter: 0.500, area: 0.20 },
-  '5':  { diameter: 0.625, area: 0.31 },
-  '6':  { diameter: 0.750, area: 0.44 },
-  '7':  { diameter: 0.875, area: 0.60 },
-  '8':  { diameter: 1.000, area: 0.79 },
-  '9':  { diameter: 1.128, area: 1.00 },
-  '10': { diameter: 1.270, area: 1.27 },
-  '11': { diameter: 1.410, area: 1.56 },
-  '14': { diameter: 1.693, area: 2.25 },
-  '18': { diameter: 2.257, area: 4.00 }
-};
-
-const barDataMetric = {
-  '10M': { diameter: 11.3, area: 100 },
-  '15M': { diameter: 16.0, area: 200 },
-  '20M': { diameter: 19.5, area: 300 },
-  '25M': { diameter: 25.2, area: 500 },
-  '30M': { diameter: 29.9, area: 700 },
-  '35M': { diameter: 35.7, area: 1000 },
-  '45M': { diameter: 43.7, area: 1500 },
-  '55M': { diameter: 56.4, area: 2500 }
-};
-
-let currentUnitSystem = 'imperial';
-
-// ====================================
-//  HELPERS
-// ====================================
-function fmt(n, d = 2) {
-  if (n === null || n === undefined || isNaN(n)) return '—';
-  return Number(n).toFixed(d);
-}
-function fmtThousands(n, d = 0) {
-  if (isNaN(n)) return '—';
-  return Number(n).toFixed(d).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-}
-function showToast(msg = 'Copied to clipboard') {
-  const toast = document.getElementById('toast');
-  document.getElementById('toast-msg').textContent = msg;
-  toast.classList.add('show');
-  clearTimeout(window._toastTimer);
-  window._toastTimer = setTimeout(() => toast.classList.remove('show'), 2400);
-}
-
-function saveInputs() {
-  try {
-    const inputs = {};
-    document.querySelectorAll('input, select').forEach(el => {
-      if (el.id) {
-        inputs[el.id] = el.value;
-        if (el.type === 'checkbox') inputs[el.id] = el.checked;
-      }
-    });
-    inputs['unitSystem'] = currentUnitSystem;
-    localStorage.setItem('rebarCalcInputs', JSON.stringify(inputs));
-  } catch (e) {
-    console.warn("LocalStorage save failed (likely disabled in browser).");
-  }
-}
-
-function loadInputs() {
-  try {
-    const saved = localStorage.getItem('rebarCalcInputs');
-    if (saved) {
-      const inputs = JSON.parse(saved);
-      Object.keys(inputs).forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-          if (el.type === 'checkbox') el.checked = inputs[id];
-          else el.value = inputs[id];
-        }
-      });
-      if (inputs['unitSystem']) {
-        currentUnitSystem = inputs['unitSystem'];
-        updateUnitUI();
-      }
-    }
-  } catch (e) {
-    console.warn("LocalStorage load failed (likely disabled in browser).");
-  }
-}
-
-// ====================================
-//  UNIT SYSTEM UI
-// ====================================
-function updateUnitUI() {
-  const isMetric = currentUnitSystem === 'metric';
-  document.querySelectorAll('.unit-len').forEach(e => e.textContent = isMetric ? 'mm' : 'in');
-  document.querySelectorAll('.unit-stress').forEach(e => e.textContent = isMetric ? 'MPa' : 'psi');
-  document.querySelectorAll('.unit-area').forEach(e => e.textContent = isMetric ? 'mm²' : 'in²');
-
-  document.getElementById('bar-size-imperial').classList.toggle('hidden', isMetric);
-  document.getElementById('bar-size-metric').classList.toggle('hidden', !isMetric);
-  document.getElementById('fy-imperial').classList.toggle('hidden', isMetric);
-  document.getElementById('fy-metric').classList.toggle('hidden', !isMetric);
-  document.getElementById('fc-imperial').classList.toggle('hidden', isMetric);
-  document.getElementById('fc-metric').classList.toggle('hidden', !isMetric);
-
-  document.querySelectorAll('#unit-toggle button').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.unit === currentUnitSystem);
-  });
-}
-
-// ====================================
-//  MAIN CALCULATE FUNCTION
-// ====================================
-function calculate() {
-  saveInputs();
-
-  const isMetric = currentUnitSystem === 'metric';
-  const aciVersion = document.getElementById('aci-version').value;
-  
-  // Read inputs based on unit system
-  const barSize = isMetric ? document.getElementById('bar-size-metric').value : document.getElementById('bar-size-imperial').value;
-  const bar = isMetric ? barDataMetric[barSize] : barDataImperial[barSize];
-  
-  let fy, fc, clearCover, clearSpacing, atr, sTrans;
-  
-  if (isMetric) {
-    fy = parseFloat(document.getElementById('fy-metric').value);
-    fc = parseFloat(document.getElementById('fc-metric').value);
-    clearCover = parseFloat(document.getElementById('clear-cover').value);
-    clearSpacing = parseFloat(document.getElementById('clear-spacing').value);
-    atr = document.getElementById('has-transverse').checked ? Math.max(0, parseFloat(document.getElementById('atr').value) || 0) : 0;
-    sTrans = document.getElementById('has-transverse').checked ? Math.max(0.5, parseFloat(document.getElementById('s-trans').value) || 1) : 1;
-  } else {
-    fy = parseFloat(document.getElementById('fy-imperial').value);
-    fc = parseFloat(document.getElementById('fc-imperial').value);
-    clearCover = parseFloat(document.getElementById('clear-cover').value);
-    clearSpacing = parseFloat(document.getElementById('clear-spacing').value);
-    atr = document.getElementById('has-transverse').checked ? Math.max(0, parseFloat(document.getElementById('atr').value) || 0) : 0;
-    sTrans = document.getElementById('has-transverse').checked ? Math.max(0.5, parseFloat(document.getElementById('s-trans').value) || 1) : 1;
-  }
-
-  const nBars = document.getElementById('has-transverse').checked ? Math.max(1, parseFloat(document.getElementById('n-bars').value) || 1) : 1;
-  const barLocation = document.getElementById('bar-location').value;
-  const coating = document.getElementById('coating').value;
-  const concreteType = document.getElementById('concrete-type').value;
-  const hookType = document.getElementById('hook-type').value;
-  const hookConfinement = parseFloat(document.getElementById('hook-confinement').value);
-  const bundledBars = parseInt(document.getElementById('bundled-bars').value);
-  const calcMethod = document.getElementById('calc-method').value;
-  const hasTransverse = document.getElementById('has-transverse').checked;
-
-  const db = bar.diameter;
-  const barArea = bar.area;
-
-  // Unit-specific coefficients (ACI Imperial vs Metric)
-  const coeff = {
-    tension: isMetric ? 0.9 : 3/40,
-    comp_term1: isMetric ? 1/25 : 1/50,
-    comp_term2: isMetric ? 0.0017 : 0.0003,
-    hook: isMetric ? 0.24 : 0.02,
-    head: isMetric ? 4.8 : 0.4
-  };
-
-  // 1. TENSION DEVELOPMENT LENGTH
-  const psiT = (barLocation === 'top') ? 1.3 : 1.0;
-  const psiTReason = (barLocation === 'top') ? 'top cast, greater than 12 in below' : 'not top cast';
-
-  let psiE, psiEReason;
-  if (coating === 'uncoated') {
-    psiE = 1.0;
-    psiEReason = 'uncoated';
-  } else {
-    if (clearCover < 3 * db || clearSpacing < 6 * db) {
-      psiE = 1.5;
-      psiEReason = 'epoxy, cover less than 3db or spacing less than 6db';
-    } else {
-      psiE = 1.2;
-      psiEReason = 'epoxy, cover at least 3db and spacing at least 6db';
-    }
-  }
-
-  let productLimited = false;
-  let psiE_adj = psiE;
-  let productPsi = psiT * psiE;
-  if (productPsi > 1.7) {
-    psiE_adj = 1.7 / psiT;
-    productLimited = true;
-    productPsi = 1.7;
-  }
-
-  let psiS = (parseInt(barSize) <= 6 || (barSize.includes('M') && parseInt(barSize) <= 20)) ? 0.8 : 1.0;
-  const psiSReason = (psiS === 0.8) ? 'small bar diameter' : 'large bar diameter';
-
-  if (calcMethod === 'simplified') {
-    psiS = 1.0; // Simplified method forces psiS = 1.0
-  }
-
-  let psiG = 1.0;
-  let psiGReason = '';
-  if (fy <= (isMetric ? 420 : 60000)) {
-    psiG = 1.0;
-    psiGReason = `fy = ${fmtThousands(fy)} ${isMetric?'MPa':'psi'}, 60 ksi or less`;
-  } else if (fy < (isMetric ? 690 : 100000)) {
-    psiG = 1.0 + (fy - (isMetric ? 420 : 60000)) / ((isMetric ? 280 : 40000)) * 0.15;
-    psiGReason = `fy = ${fmtThousands(fy)} ${isMetric?'MPa':'psi'}, interpolated`;
-  } else if (fy < (isMetric ? 830 : 120000)) {
-    psiG = 1.15 + (fy - (isMetric ? 690 : 100000)) / ((isMetric ? 140 : 20000)) * 0.15;
-    psiGReason = `fy = ${fmtThousands(fy)} ${isMetric?'MPa':'psi'}, interpolated`;
-  } else {
-    psiG = 1.3;
-    psiGReason = `fy = ${fmtThousands(fy)} ${isMetric?'MPa':'psi'}, 120 ksi or more`;
-  }
-
-  const lambda = (concreteType === 'normal') ? 1.0 : (concreteType === 'sand-lw') ? 0.85 : 0.75;
-  const lambdaReason = (concreteType === 'normal') ? 'normal weight' : (concreteType === 'sand-lw') ? 'sand-lightweight' : 'all-lightweight';
-
-  // Equivalent diameter for bundled bars (for confinement only)
-  const db_eq = bundledBars > 1 ? Math.sqrt(4 * (barArea * bundledBars) / Math.PI) : db;
-
-  const cb1 = clearCover + db_eq / 2;
-  const cb2 = (clearSpacing + db_eq) / 2;
-  const cb = Math.min(cb1, cb2);
-  const cbGoverns = (cb1 <= cb2) ? 'cover' : 'spacing';
-
-  const ktr = hasTransverse ? (40 * atr) / (sTrans * nBars) : 0;
-
-  const rawRatio = (cb + ktr) / db_eq;
-  const confCapped = rawRatio > 2.5;
-  let confRatio = Math.min(rawRatio, 2.5);
-
-  if (calcMethod === 'simplified') {
-    confRatio = 2.5; // Simplified method forces this to 2.5
-  }
-
-  const sqrtFc = Math.sqrt(fc);
-  const factorProduct = psiT * psiE_adj * psiS * psiG;
-  let ldRaw = coeff.tension * (fy / sqrtFc) * (factorProduct / lambda) * (db / confRatio);
-  
-  // Bundled bar multiplier
-  let bundleMult = 1.0;
-  if (bundledBars === 3) bundleMult = 1.2;
-  if (bundledBars === 4) bundleMult = 1.33;
-  ldRaw *= bundleMult;
-
-  const ldMin = isMetric ? 300 : 12;
-  const ldMinGoverns = ldRaw < ldMin;
-  const ld = Math.max(ldRaw, ldMin);
-
-  // 2. TENSION LAP SPLICE
-  const lsClassA = 1.0 * ld;
-  const lsClassB = 1.3 * ld;
-  const lsMin = isMetric ? 300 : 12;
-  const lsClassA_final = Math.max(lsClassA, lsMin);
-  const lsClassB_final = Math.max(lsClassB, lsMin);
-
-  // 3. COMPRESSION DEVELOPMENT
-  const ldc_term1 = (fy / (coeff.comp_term1 * lambda * sqrtFc)) * db;
-  const ldc_term2 = coeff.comp_term2 * fy * db;
-  const ldcRaw = Math.max(ldc_term1, ldc_term2);
-  const ldcMin = isMetric ? 200 : 8;
-  const ldc = Math.max(ldcRaw, ldcMin);
-  const ldcGovernsTerm = (ldc_term1 >= ldc_term2) ? 'fy/(50*lambda*sqrt(fc))' : '0.0003*fy';
-
-  // 4. COMPRESSION LAP SPLICE
-  let lscRaw;
-  let lscFormula;
-  const fy_limit = isMetric ? 420 : 60000;
-  if (fy <= fy_limit) {
-    lscRaw = Math.max((fy / fc) * db, coeff.comp_term2 * fy * db);
-    lscFormula = 'max(fy/fc * db, 0.0003*fy*db)';
-  } else {
-    const factor = 2 - fy_limit / fy;
-    lscRaw = Math.max(factor * (fy / fc) * db, coeff.comp_term2 * fy * db);
-    lscFormula = 'max((2 - 60,000/fy)*(fy/fc)*db, 0.0003*fy*db)';
-  }
-  let lscMultiplier = 1.0;
-  if (fc < (isMetric ? 21 : 3000)) {
-    lscMultiplier = 2.0;
-    lscRaw *= 2.0;
-  }
-  const lscMin = isMetric ? 300 : 12;
-  const lsc = Math.max(lscRaw, lscMin);
-
-  // 5. HOOKED BAR DEVELOPMENT
-  let ldh = 0, ldhRaw = 0, ldhMin = 0, ldhMin1 = 0, ldhMin2 = 0;
-  let ldhMinGoverns = false;
-  const psiE_hook = (coating === 'epoxy') ? 1.2 : 1.0;
-  const psiR_hook = hookConfinement;
-
-  if (hookType !== 'straight') {
-    ldhRaw = (coeff.hook * fy * psiE_hook * psiR_hook) / (lambda * sqrtFc) * db;
-    ldhMin1 = 8 * db;
-    ldhMin2 = isMetric ? 150 : 6;
-    ldhMin = Math.max(ldhMin1, ldhMin2);
-    ldh = Math.max(ldhRaw, ldhMin);
-    ldhMinGoverns = (ldhMin > ldhRaw);
-  }
-
-  // 6. HEADED BAR DEVELOPMENT
-  const psiE_head = (coating === 'epoxy') ? 1.2 : 1.0;
-  const psiP_head = 1.0;
-  const Rb = 1.0;
-  const ldhHeadRaw = (coeff.head * fy * psiE_head * psiP_head * Rb) / (lambda * sqrtFc) * db;
-  const ldhHeadMin1 = 8 * db;
-  const ldhHeadMin2 = isMetric ? 150 : 6;
-  const ldhHeadMin = Math.max(ldhHeadMin1, ldhHeadMin2);
-  const ldhHeadCapped = Math.min(ldhHeadRaw, ld);
-  const ldhHead = Math.max(ldhHeadCapped, ldhHeadMin);
-  const ldhHeadGoverns = (ldhHeadMin > ldhHeadCapped) ? 'minimum' : 'calc';
-
-  // Update UI Cards
-  document.getElementById('card-ld').textContent = fmt(ld);
-  document.getElementById('card-ls').textContent = fmt(lsClassB_final);
-  document.getElementById('card-ldc').textContent = fmt(ldc);
-  document.getElementById('card-lsc').textContent = fmt(lsc);
-  document.getElementById('card-ldh').textContent = (hookType === 'straight') ? 'N/A' : fmt(ldh);
-  document.getElementById('card-ldh-head').textContent = fmt(ldhHead);
-
-  // Build Outputs
-  const data = {
-    aciVersion, barSize, db, barArea, fy, fc, isMetric,
-    psiT, psiTReason, psiE, psiEReason, psiE_adj, productLimited, productPsi,
-    psiS, psiSReason, psiG, psiGReason, lambda, lambdaReason,
-    clearCover, clearSpacing, cb1, cb2, cb, cbGoverns,
-    hasTransverse, atr, sTrans, nBars, ktr,
-    rawRatio, confCapped, confRatio,
-    sqrtFc, factorProduct, ldRaw, ldMin, ldMinGoverns, ld,
-    lsClassA_final, lsClassB_final, lsMin,
-    ldc_term1, ldc_term2, ldcRaw, ldcMin, ldc, ldcGovernsTerm,
-    fy_le_60k: fy <= fy_limit, lscRaw, lscFormula, lscMultiplier, lscMin, lsc,
-    hookType, psiE_hook, psiR_hook, ldhRaw, ldhMin1, ldhMin2, ldhMin, ldh, ldhMinGoverns,
-    psiE_head, psiP_head, Rb, ldhHeadRaw, ldhHeadMin, ldhHeadCapped, ldhHead, ldhHeadGoverns,
-    calcMethod, bundledBars, db_eq, bundleMult, coeff
-  };
-
-  // Save data globally for export buttons
-  window._lastCalcData = data;
-
-  buildLatexOutput(data);
-  buildWordOutput(data);
-  drawDiagram(data);
-}
-
-// ====================================
-//  DRAW DYNAMIC DIAGRAM
-// ====================================
-function drawDiagram(d) {
-  const svg = document.getElementById('section-diagram');
-  const isMetric = d.isMetric;
-  const unitL = isMetric ? 'mm' : 'in';
-  
-  const totalWidth = d.clearCover + d.db + d.clearSpacing + d.db + d.clearCover;
-  const totalHeight = d.clearCover + d.db + d.clearCover;
-  
-  const scale = 400 / Math.max(totalWidth, 1); // Prevent division by 0
-  const w = totalWidth * scale;
-  const h = totalHeight * scale;
-  
-  const cover = d.clearCover * scale;
-  const spacing = d.clearSpacing * scale;
-  const db = d.db * scale;
-
-  svg.setAttribute('viewBox', `0 0 ${w + 80} ${h + 60}`);
-  
-  svg.innerHTML = `
-    <defs>
-      <pattern id="conc-hatch" patternUnits="userSpaceOnUse" width="6" height="6" patternTransform="rotate(45)">
-        <line x1="0" y1="0" x2="0" y2="6" stroke="#94a3b8" stroke-width="0.5" opacity="0.5"/>
-      </pattern>
-    </defs>
-    <rect x="0" y="0" width="${w}" height="${h}" fill="url(#conc-hatch)" stroke="#475569" stroke-width="1"/>
-    
-    <!-- Bar 1 -->
-    <circle cx="${cover + db/2}" cy="${cover + db/2}" r="${db/2}" fill="#1e293b" stroke="#0f172a" stroke-width="1"/>
-    <!-- Bar 2 -->
-    <circle cx="${cover + db + spacing + db/2}" cy="${cover + db/2}" r="${db/2}" fill="#1e293b" stroke="#0f172a" stroke-width="1"/>
-    
-    <!-- Cover Dim -->
-    <line x1="0" y1="${h + 10}" x2="${cover}" y2="${h + 10}" stroke="#d97706" stroke-width="1"/>
-    <line x1="0" y1="${h + 5}" x2="0" y2="${h + 15}" stroke="#d97706" stroke-width="1"/>
-    <line x1="${cover}" y1="${h + 5}" x2="${cover}" y2="${h + 15}" stroke="#d97706" stroke-width="1"/>
-    <text x="${cover/2}" y="${h + 25}" fill="#d97706" font-size="11" font-family="JetBrains Mono" text-anchor="middle">${fmt(d.clearCover, 2)} ${unitL}</text>
-    
-    <!-- Spacing Dim -->
-    <line x1="${cover + db}" y1="${h + 10}" x2="${cover + db + spacing}" y2="${h + 10}" stroke="#d97706" stroke-width="1"/>
-    <line x1="${cover + db}" y1="${h + 5}" x2="${cover + db}" y2="${h + 15}" stroke="#d97706" stroke-width="1"/>
-    <line x1="${cover + db + spacing}" y1="${h + 5}" x2="${cover + db + spacing}" y2="${h + 15}" stroke="#d97706" stroke-width="1"/>
-    <text x="${cover + db + spacing/2}" y="${h + 25}" fill="#d97706" font-size="11" font-family="JetBrains Mono" text-anchor="middle">${fmt(d.clearSpacing, 2)} ${unitL}</text>
-    
-    <!-- Bar Size Labels -->
-    <text x="${cover + db/2}" y="${cover + db/2 + 4}" fill="white" font-size="9" font-family="Inter" text-anchor="middle" font-weight="bold">#${d.barSize}</text>
-    <text x="${cover + db + spacing + db/2}" y="${cover + db/2 + 4}" fill="white" font-size="9" font-family="Inter" text-anchor="middle" font-weight="bold">#${d.barSize}</text>
-    
-    <!-- Labels -->
-    <text x="${w/2}" y="-5" fill="#475569" font-size="11" font-family="Inter" text-anchor="middle" font-weight="600">Section View</text>
-  `;
-}
-
-// ====================================
-//  BUILD LATEX OUTPUT
-// ====================================
-function buildLatexOutput(d) {
-  let h = '';
-  const uL = d.isMetric ? 'text{ mm}' : 'text{ in}';
-  const uS = d.isMetric ? 'text{ MPa}' : 'text{ psi}';
-  const uA = d.isMetric ? 'text{ mm}^2' : 'text{ in}^2';
-
-  // 1. TENSION DEVELOPMENT LENGTH
-  h += `<div class="calc-section fade-up">
-    <div class="calc-section-title">
-      <span style="display:inline-flex;width:28px;height:28px;border-radius:50%;background:var(--primary);color:white;font-size:12px;font-weight:700;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;">1</span>
-      Tension Development Length — §25.4.2 (${d.aciVersion})
-    </div>
-
-    <div class="calc-step">
-      <div class="step-label">Given Parameters</div>
-      $$ d_b = ${fmt(d.db, 3)} \\${uL}, \\quad A_b = ${fmt(d.barArea, 2)} \\${uA}, \\quad f_y = ${fmtThousands(d.fy)} \\${uS}, \\quad f'_c = ${fmtThousands(d.fc)} \\${uS} $$     </div>`;
-
-  if (d.bundledBars > 1) {
-    h += `
-    <div class="calc-step">
-      <div class="step-label">Bundled Bars Adjustment (§25.4.10.3)</div>
-      $$ d_{b,eq} = \\sqrt{\\frac{4 (n \\cdot A_b)}{\\pi}} = \\sqrt{\\frac{4 (${d.bundledBars} \\times ${fmt(d.barArea, 2)})}{\\pi}} = ${fmt(d.db_eq, 3)} \\${uL} $$       <p style="font-size:12px;color:var(--muted);margin-top:5px;">Equivalent diameter used for confinement calculations. Final $\\ell_d$ will be multiplied by ${d.bundleMult}.</p>
-    </div>`;
-  }
-
-  h += `
-    <div class="calc-step">
-      <div class="step-label">Step 1 — Modification Factors (Table 25.4.2.4)</div>
-      $$ \\psi_t = ${fmt(d.psiT, 2)} \\quad \\text{(${d.psiTReason})} $$       $$ \\psi_e = ${fmt(d.psiE, 2)} \\quad \\text{(${d.psiEReason})} $$`;
-
-  if (d.productLimited) {
-    h += `$$ \\psi_t \\cdot \\psi_e = ${fmt(d.psiT,2)} \\times ${fmt(d.psiE,2)} = ${fmt(d.psiT * d.psiE, 2)} > 1.7 \\Rightarrow \\text{limited to } 1.7 $$`;
-  } else {
-    h += `$$ \\psi_t \\cdot \\psi_e = ${fmt(d.psiT,2)} \\times ${fmt(d.psiE,2)} = ${fmt(d.psiT * d.psiE, 2)} \\leq 1.7 \\quad \\text{(OK)} $$`;
-  }
-
-  h += `
-      $$ \\psi_s = ${fmt(d.psiS, 2)} \\quad \\text{(${d.psiSReason}${d.calcMethod === 'simplified' ? ', forced to 1.0 in simplified method' : ''})} $$       $$ \\psi_g = ${fmt(d.psiG, 4)} \\quad \\text{(${d.psiGReason})} $$       $$ \\lambda = ${fmt(d.lambda, 2)} \\quad \\text{(${d.lambdaReason})} $$     </div>`;
-
-  if (d.calcMethod === 'detailed') {
-    h += `
-    <div class="calc-step">
-      <div class="step-label">Step 2 — Confinement Term $c_b$ (§25.4.2.2)</div>
-      $$ c_b = \\min\\left( \\text{cover} + \\frac{d_{b,eq}}{2},\\; \\frac{\\text{clear spacing} + d_{b,eq}}{2} \\right) $$       $$ c_b = \\min\\left( ${fmt(d.clearCover, 2)} + \\frac{${fmt(d.db_eq, 3)}}{2},\\; \\frac{${fmt(d.clearSpacing, 2)} + ${fmt(d.db_eq, 3)}}{2} \\right) $$       $$ c_b = \\min\\left( ${fmt(d.cb1, 3)},\\; ${fmt(d.cb2, 3)} \\right) = ${fmt(d.cb, 3)} \\${uL} \\quad \\text{[${d.cbGoverns} governs]} $$     </div>`;
-
-    if (d.hasTransverse) {
-      h += `
-      <div class="calc-step">
-        <div class="step-label">Step 3 — Transverse Reinforcement Index $K_{tr}$ (§25.4.2.3)</div>
-        $$ K_{tr} = \\frac{40 \\, A_{tr}}{s \\cdot n} = \\frac{40 \\times ${fmt(d.atr, 2)}}{${fmt(d.sTrans, 1)} \\times ${d.nBars}} = ${fmt(d.ktr, 3)} \\${uL} $$       </div>`;
-    } else {
-      h += `
-      <div class="calc-step">
-        <div class="step-label">Step 3 — Transverse Reinforcement Index $K_{tr}$</div>
-        $$ K_{tr} = 0 \\quad \\text{(no transverse reinforcement provided)} $$       </div>`;
-    }
-
-    h += `
-    <div class="calc-step">
-      <div class="step-label">Step 4 — Confinement Ratio (§25.4.2.4, limit ≤ 2.5)</div>
-      $$ \\frac{c_b + K_{tr}}{d_{b,eq}} = \\frac{${fmt(d.cb, 3)} + ${fmt(d.ktr, 3)}}{${fmt(d.db_eq, 3)}} = ${fmt(d.rawRatio, 3)} $$`;
-      
-    if (d.confCapped) {
-      h += `$$ ${fmt(d.rawRatio, 3)} > 2.5 \\Rightarrow \\text{limited to } 2.500 $$`;
-    } else {
-      h += `$$ ${fmt(d.rawRatio, 3)} \\leq 2.5 \\quad \\text{(OK, no limit applied)} $$`;
-    }
-    h += `</div>`;
-  } else {
-    h += `
-    <div class="calc-step">
-      <div class="step-label">Step 2, 3, 4 — Simplified Method (§25.4.2.2)</div>
-      $$ \\frac{c_b + K_{tr}}{d_b} = 2.5 \\quad \\text{(Assumed)} $$       $$ \\psi_s = 1.0 \\quad \\text{(Forced to 1.0)} $$     </div>`;
-  }
-
-  h += `
-    <div class="calc-step">
-      <div class="step-label">Step 5 — Development Length (Eq. 25.4.2.2a)</div>
-      $$ \\ell_d = ${d.coeff.tension.toFixed(3)} \\cdot \\frac{f_y}{\\sqrt{f'_c}} \\cdot \\frac{\\psi_t \\, \\psi_e \\, \\psi_s \\, \\psi_g}{\\lambda} \\cdot \\frac{d_b}{(c_b + K_{tr})/d_b} $$       $$ \\ell_d = ${d.coeff.tension.toFixed(3)} \\cdot \\frac{${fmtThousands(d.fy)}}{\\sqrt{${fmtThousands(d.fc)}}} \\cdot \\frac{${fmt(d.psiT,2)} \\times ${fmt(d.psiE_adj,2)} \\times ${fmt(d.psiS,2)} \\times ${fmt(d.psiG, 4)}}{${fmt(d.lambda,2)}} \\cdot \\frac{${fmt(d.db, 3)}}{${fmt(d.confRatio, 3)}} $$       $$ \\ell_d = ${fmt(d.coeff.tension, 4)} \\times ${fmt(d.fy / d.sqrtFc, 2)} \\times ${fmt(d.factorProduct / d.lambda, 4)} \\times ${fmt(d.db / d.confRatio, 4)} $$`;
-
-  if (d.bundledBars > 1) {
-    h += `$$ \\ell_{d,initial} = ${fmt(d.ldRaw / d.bundleMult, 2)} \\${uL} $$`;
-    h += `$$ \\ell_d = \\ell_{d,initial} \\times ${d.bundleMult} = ${fmt(d.ldRaw / d.bundleMult, 2)} \\times ${d.bundleMult} = ${fmt(d.ldRaw, 2)} \\${uL} $$`;
-  } else {
-    h += `$$ \\ell_d = ${fmt(d.ldRaw, 2)} \\${uL} $$`;
-  }
-  h += `</div>`;
-
-  h += `
-    <div class="calc-step">
-      <div class="step-label">Step 6 — Check Minimum (§25.4.2.2(b))</div>
-      $$ \\ell_{d,\\min} = ${d.ldMin} \\${uL} $$`;
-
-  if (d.ldMinGoverns) {
-    h += `$$ \\ell_d = \\max(${fmt(d.ldRaw, 2)},\\; ${d.ldMin}) = ${fmt(d.ldMin, 2)} \\${uL} \\quad \\text{[minimum governs]} $$`;
-  } else {
-    h += `$$ \\ell_d = \\max(${fmt(d.ldRaw, 2)},\\; ${d.ldMin}) = ${fmt(d.ld, 2)} \\${uL} \\quad \\text{[calculation governs]} $$`;
-  }
-
-  h += `
-      <div class="result-box">
-        <div class="result-icon"><i class="fa-solid fa-check"></i></div>
-        <div><strong>Tension Development Length:</strong> $\\ell_d = ${fmt(d.ld, 2)} \\${uL}$</div>
-      </div>
-    </div>
-  </div>`;
-
-  // 2. TENSION SPLICE
-  h += `<div class="calc-section fade-up">
-    <div class="calc-section-title">
-      <span style="display:inline-flex;width:28px;height:28px;border-radius:50%;background:#7c3aed;color:white;font-size:12px;font-weight:700;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;">2</span>
-      Tension Lap Splice Length — §25.5.2 (${d.aciVersion})
-    </div>
-    <div class="calc-step">
-      <div class="step-label">Class A Splice (1.0 × ℓd)</div>
-      $$ \\ell_{s,A} = 1.0 \\times \\ell_d = 1.0 \\times ${fmt(d.ld, 2)} = ${fmt(d.lsClassA_final, 2)} \\${uL} $$     </div>
-    <div class="calc-step">
-      <div class="step-label">Class B Splice (1.3 × ℓd) — Default</div>
-      $$ \\ell_{s,B} = 1.3 \\times \\ell_d = 1.3 \\times ${fmt(d.ld, 2)} = ${fmt(d.lsClassB_final, 2)} \\${uL} $$       <div class="result-box">
-        <div class="result-icon"><i class="fa-solid fa-check"></i></div>
-        <div><strong>Class A:</strong> $\\ell_s = ${fmt(d.lsClassA_final, 2)} \\${uL}$ &nbsp;|&nbsp; <strong>Class B:</strong> $\\ell_s = ${fmt(d.lsClassB_final, 2)} \\${uL}$</div>
-      </div>
-    </div>
-  </div>`;
-
-  // 3. COMPRESSION DEVELOPMENT
-  h += `<div class="calc-section fade-up">
-    <div class="calc-section-title">
-      <span style="display:inline-flex;width:28px;height:28px;border-radius:50%;background:#059669;color:white;font-size:12px;font-weight:700;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;">3</span>
-      Compression Development Length — §25.4.9 (${d.aciVersion})
-    </div>
-    <div class="calc-step">
-      <div class="step-label">Step 1 — Development Length (Eq. 25.4.9.2)</div>
-      $$ \\ell_{dc} = \\max\\left( \\frac{f_y}{${d.coeff.comp_term1.toFixed(2)} \\, \\lambda \\, \\sqrt{f'_c}} \\cdot d_b, \\; ${d.coeff.comp_term2} \\, f_y \\, d_b \\right) $$       $$ \\text{Term 1:} \\quad \\frac{${fmtThousands(d.fy)}}{${d.coeff.comp_term1.toFixed(2)} \\times ${fmt(d.lambda,2)} \\times \\sqrt{${fmtThousands(d.fc)}}} \\times ${fmt(d.db, 3)} = ${fmt(d.ldc_term1, 2)} \\${uL} $$       $$ \\text{Term 2:} \\quad ${d.coeff.comp_term2} \\times ${fmtThousands(d.fy)} \\times ${fmt(d.db, 3)} = ${fmt(d.ldc_term2, 2)} \\${uL} $$       $$ \\ell_{dc} = \\max(${fmt(d.ldc_term1, 2)},\\; ${fmt(d.ldc_term2, 2)}) = ${fmt(Math.max(d.ldc_term1, d.ldc_term2), 2)} \\${uL} $$     </div>
-    <div class="calc-step">
-      <div class="step-label">Step 2 — Check Minimum (§25.4.9.3)</div>
-      $$ \\ell_{dc,\\min} = ${d.ldcMin} \\${uL} $$       <div class="result-box">
-        <div class="result-icon"><i class="fa-solid fa-check"></i></div>
-        <div><strong>Compression Development Length:</strong> $\\ell_{dc} = ${fmt(d.ldc, 2)} \\${uL}$</div>
-      </div>
-    </div>
-  </div>`;
-
-  // 4. COMPRESSION SPLICE
-  h += `<div class="calc-section fade-up">
-    <div class="calc-section-title">
-      <span style="display:inline-flex;width:28px;height:28px;border-radius:50%;background:#0891b2;color:white;font-size:12px;font-weight:700;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;">4</span>
-      Compression Lap Splice Length — §25.5.5 (${d.aciVersion})
-    </div>`;
-
-  if (d.fy_le_60k) {
-    h += `
-    <div class="calc-step">
-      <div class="step-label">Step 1 — Splice Length (§25.5.5.2)</div>
-      $$ \\ell_{sc} = \\max\\left( \\frac{f_y}{f'_c} \\cdot d_b, \\; ${d.coeff.comp_term2} \\, f_y \\, d_b \\right) $$       $$ \\ell_{sc} = \\max\\left( \\frac{${fmtThousands(d.fy)}}{${fmtThousands(d.fc)}} \\times ${fmt(d.db, 3)}, \\; ${fmt(d.coeff.comp_term2 * d.fy * d.db, 2)} \\right) = ${fmt(d.lscRaw / d.lscMultiplier, 2)} \\${uL} $$`;
-  } else {
-    h += `
-    <div class="calc-step">
-      <div class="step-label">Step 1 — Splice Length (§25.5.5.2)</div>
-      $$ \\ell_{sc} = \\max\\left( \\left(2 - \\frac{60{,}000}{f_y}\\right) \\cdot \\frac{f_y}{f'_c} \\cdot d_b, \\; ${d.coeff.comp_term2} \\, f_y \\, d_b \\right) $$`;
-  }
-
-  if (d.lscMultiplier > 1) {
-    h += `$$ f'_c < 3000 \\text{ psi} \\Rightarrow \\ell_{sc} \\times 2.0 = ${fmt(d.lscRaw, 2)} \\${uL} $$`;
-  }
-
-  h += `
-    </div>
-    <div class="calc-step">
-      <div class="step-label">Step 2 — Check Minimum (§25.5.5.4)</div>
-      $$ \\ell_{sc,\\min} = ${d.lscMin} \\${uL} $$       <div class="result-box">
-        <div class="result-icon"><i class="fa-solid fa-check"></i></div>
-        <div><strong>Compression Lap Splice:</strong> $\\ell_{sc} = ${fmt(d.lsc, 2)} \\${uL}$</div>
-      </div>
-    </div>
-  </div>`;
-
-  // 5. HOOKED BAR
-  h += `<div class="calc-section fade-up">
-    <div class="calc-section-title">
-      <span style="display:inline-flex;width:28px;height:28px;border-radius:50%;background:#d97706;color:white;font-size:12px;font-weight:700;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;">5</span>
-      Hooked Bar Development Length — §25.4.3 (${d.aciVersion})
-    </div>`;
-
-  if (d.hookType === 'straight') {
-    h += `<div class="calc-step"><div class="step-label">Not Applicable</div><p style="font-size:13px;color:var(--muted);">Straight bar selected. Hooked bar development length does not apply.</p></div></div>`;
-  } else {
-    h += `
-      <div class="calc-step">
-        <div class="step-label">Standard Hook Type</div>
-        $$ \\text{${d.hookType}° standard hook per §25.3.1} $$       </div>
-      <div class="calc-step">
-        <div class="step-label">Step 1 — Modification Factors (Table 25.4.3.2)</div>
-        $$ \\psi_e = ${fmt(d.psiE_hook, 2)} \\quad \\text{(${d.coating === 'epoxy' ? 'epoxy-coated' : 'uncoated'})} $$         $$ \\psi_r = ${fmt(d.psiR_hook, 2)} \\quad \\text{(${d.psiR_hook === 0.75 ? 'confined by ties/stirrups' : 'no confinement'})} $$         $$ \\lambda = ${fmt(d.lambda, 2)} \\quad \\text{(${d.lambdaReason})} $$       </div>
-      <div class="calc-step">
-        <div class="step-label">Step 2 — Hooked Bar Development (Eq. 25.4.3.2)</div>
-        $$ \\ell_{dh} = \\frac{${d.coeff.hook} \\, f_y \\, \\psi_e \\, \\psi_r}{\\lambda \\, \\sqrt{f'_c}} \\cdot d_b $$         $$ \\ell_{dh} = \\frac{${d.coeff.hook} \\times ${fmtThousands(d.fy)} \\times ${fmt(d.psiE_hook, 2)} \\times ${fmt(d.psiR_hook, 2)}}{${fmt(d.lambda, 2)} \\times \\sqrt{${fmtThousands(d.fc)}}} \\times ${fmt(d.db, 3)} = ${fmt(d.ldhRaw, 2)} \\${uL} $$       </div>
-      <div class="calc-step">
-        <div class="step-label">Step 3 — Check Minimum (§25.4.3.2)</div>
-        $$ \\ell_{dh,\\min} = \\max(8 \\, d_b, \\; ${d.ldhMin2}) = ${fmt(d.ldhMin, 2)} \\${uL} $$`;
-        
-    if (d.ldhMinGoverns) {
-      h += `$$ \\ell_{dh} = \\max(${fmt(d.ldhRaw, 2)},\\; ${fmt(d.ldhMin, 2)}) = ${fmt(d.ldhMin, 2)} \\${uL} \\quad \\text{[minimum governs]} $$`;
-    } else {
-      h += `$$ \\ell_{dh} = \\max(${fmt(d.ldhRaw, 2)},\\; ${fmt(d.ldhMin, 2)}) = ${fmt(d.ldh, 2)} \\${uL} \\quad \\text{[calculation governs]} $$`;
-    }
-
-    h += `
-        <div class="result-box">
-          <div class="result-icon"><i class="fa-solid fa-check"></i></div>
-          <div><strong>Hooked Bar Development Length (${d.hookType}° hook):</strong> $\\ell_{dh} = ${fmt(d.ldh, 2)} \\${uL}$</div>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  // 6. HEADED BAR
-  h += `<div class="calc-section fade-up">
-    <div class="calc-section-title">
-      <span style="display:inline-flex;width:28px;height:28px;border-radius:50%;background:#dc2626;color:white;font-size:12px;font-weight:700;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;">6</span>
-      Headed Bar Development Length — §25.4.4 (${d.aciVersion})
-    </div>
-    <div class="calc-step">
-      <div class="step-label">Step 1 — Modification Factors (Table 25.4.4.2)</div>
-      $$ \\psi_e = ${fmt(d.psiE_head, 2)} \\quad \\text{(${d.coating === 'epoxy' ? 'epoxy-coated' : 'uncoated'})} $$       $$ \\psi_p = ${fmt(d.psiP_head, 2)} \\quad \\text{(standard head, } A_{brg} \\geq 4A_b\\text{)} $$       $$ R_b = ${fmt(d.Rb, 2)} \\quad \\text{(${d.barSize <= 11 ? '#11 and smaller' : 'larger bars'})} $$       $$ \\lambda = ${fmt(d.lambda, 2)} \\quad \\text{(${d.lambdaReason})} $$     </div>
-    <div class="calc-step">
-      <div class="step-label">Step 2 — Headed Bar Development (Eq. 25.4.4.2a)</div>
-      $$ \\ell_{dh} = \\frac{${d.coeff.head} \\, f_y \\, \\psi_e \\, \\psi_p \\, R_b}{\\lambda \\, \\sqrt{f'_c}} \\cdot d_b $$       $$ \\ell_{dh} = \\frac{${d.coeff.head} \\times ${fmtThousands(d.fy)} \\times ${fmt(d.psiE_head, 2)} \\times ${fmt(d.psiP_head, 2)} \\times ${fmt(d.Rb, 2)}}{${fmt(d.lambda, 2)} \\times \\sqrt{${fmtThousands(d.fc)}}} \\times ${fmt(d.db, 3)} = ${fmt(d.ldhHeadRaw, 2)} \\${uL} $$     </div>
-    <div class="calc-step">
-      <div class="step-label">Step 3 — Upper Limit: ≤ ℓd of straight bar (§25.4.4.3)</div>
-      $$ \\ell_{dh,capped} = \\min(${fmt(d.ldhHeadRaw, 2)},\\; ${fmt(d.ld, 2)}) = ${fmt(d.ldhHeadCapped, 2)} \\${uL} $$     </div>
-    <div class="calc-step">
-      <div class="step-label">Step 4 — Check Minimum (§25.4.4.2(b))</div>
-      $$ \\ell_{dh,\\min} = \\max(8 \\, d_b, \\; 6) = ${fmt(d.ldhHeadMin, 2)} \\${uL} $$`;
-
-  if (d.ldhHeadGoverns === 'minimum') {
-    h += `$$ \\ell_{dh} = \\max(${fmt(d.ldhHeadCapped, 2)},\\; ${fmt(d.ldhHeadMin, 2)}) = ${fmt(d.ldhHead, 2)} \\${uL} \\quad \\text{[minimum governs]} $$`;
-  } else {
-    h += `$$ \\ell_{dh} = \\max(${fmt(d.ldhHeadCapped, 2)},\\; ${fmt(d.ldhHeadMin, 2)}) = ${fmt(d.ldhHead, 2)} \\${uL} \\quad \\text{[calculation governs]} $$`;
-  }
-
-  h += `
-      <div class="result-box">
-        <div class="result-icon"><i class="fa-solid fa-check"></i></div>
-        <div><strong>Headed Bar Development Length:</strong> $\\ell_{dh} = ${fmt(d.ldhHead, 2)} \\${uL}$</div>
-      </div>
-    </div>
-  </div>`;
-
-  const container = document.getElementById('latex-output');
-  container.innerHTML = h;
-
-  if (window.MathJax && MathJax.typesetPromise) {
-    try {
-      MathJax.typesetClear([container]);
-      MathJax.typesetPromise([container]).then(() => {
-        window._latexSource = h;
-      }).catch((err) => console.error(err));
-    } catch (e) {
-      console.error("MathJax typeset error:", e);
-    }
-  }
-}
-
-// ====================================
-//  BUILD WORD OUTPUT
-// ====================================
-function buildWordOutput(d) {
-  const projName = document.getElementById('proj-name').value || '—';
-  const projItem = document.getElementById('proj-item').value || '—';
-  const projDate = document.getElementById('proj-date').value || '—';
-  const projEng = document.getElementById('proj-eng').value || '—';
-
-  const uL = d.isMetric ? 'mm' : 'in';
-  const uS = d.isMetric ? 'MPa' : 'psi';
-  const uA = d.isMetric ? 'mm2' : 'in2';
-
-  let t = '';
-  const div = '═'.repeat(75);
-  const sub = '─'.repeat(75);
-
-  t += div + '\n';
-  t += '  REBAR DEVELOPMENT AND SPLICE LENGTH CALCULATIONS\n';
-  t += '  Per ACI ' + d.aciVersion + '\n';
-  t += div + '\n\n';
-  t += '  Project:    ' + projName + '\n';
-  t += '  Item:       ' + projItem + '\n';
-  t += '  Date:       ' + projDate + '\n';
-  t += '  Engineer:   ' + projEng + '\n\n';
-
-  t += sub + '\n';
-  t += '  DESIGN PARAMETERS\n';
-  t += sub + '\n\n';
-  t += '  Unit System:           ' + (d.isMetric ? 'Metric (mm, MPa)' : 'Imperial (in, psi)') + '\n';
-  t += '  Bar Size:              #' + d.barSize + '\n';
-  t += '  Bar Diameter (db):     ' + fmt(d.db, 3) + ' ' + uL + '\n';
-  t += '  Bar Area (Ab):         ' + fmt(d.barArea, 2) + ' ' + uA + '\n';
-  t += '  Yield Strength (fy):   ' + fmtThousands(d.fy) + ' ' + uS + '\n';
-  t += "  Concrete Strength:     " + fmtThousands(d.fc) + " " + uS + '\n';
-  t += '  Clear Cover:           ' + fmt(d.clearCover, 2) + ' ' + uL + '\n';
-  t += '  Clear Spacing:         ' + fmt(d.clearSpacing, 2) + ' ' + uL + '\n';
-  t += '  Hook Type:             ' + (d.hookType === 'straight' ? 'Straight Bar' : d.hookType + ' deg hook') + '\n\n';
-
-  t += sub + '\n';
-  t += '  1. TENSION DEVELOPMENT LENGTH\n';
-  t += sub + '\n\n';
-  t += '  ld = ' + fmt(d.ld, 2) + ' ' + uL + '\n\n';
-
-  t += sub + '\n';
-  t += '  2. TENSION LAP SPLICE LENGTH (CLASS B)\n';
-  t += sub + '\n\n';
-  t += '  ls = ' + fmt(d.lsClassB_final, 2) + ' ' + uL + '\n\n';
-
-  t += sub + '\n';
-  t += '  3. COMPRESSION DEVELOPMENT LENGTH\n';
-  t += sub + '\n\n';
-  t += '  ldc = ' + fmt(d.ldc, 2) + ' ' + uL + '\n\n';
-
-  t += sub + '\n';
-  t += '  4. COMPRESSION LAP SPLICE LENGTH\n';
-  t += sub + '\n\n';
-  t += '  lsc = ' + fmt(d.lsc, 2) + ' ' + uL + '\n\n';
-
-  if (d.hookType !== 'straight') {
-    t += sub + '\n';
-    t += '  5. HOOKED BAR DEVELOPMENT LENGTH\n';
-    t += sub + '\n\n';
-    t += '  ldh = ' + fmt(d.ldh, 2) + ' ' + uL + '\n\n';
-  }
-
-  t += sub + '\n';
-  t += '  6. HEADED BAR DEVELOPMENT LENGTH\n';
-  t += sub + '\n\n';
-  t += '  ldh = ' + fmt(d.ldhHead, 2) + ' ' + uL + '\n\n';
-
-  t += div + '\n';
-  t += '  PREPARED BY: ' + projEng + '\n';
-  t += div + '\n';
-
-  document.getElementById('word-output').value = t;
-}
-
-// ====================================
-//  FILE EXPORTS
-// ====================================
-function downloadFile(filename, content, type = 'text/plain') {
-  const blob = new Blob([content], { type });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = filename;
-  a.click();
-  URL.revokeObjectURL(a.href);
-}
-
-function generateDXF(d) {
-  const projEng = document.getElementById('proj-eng').value;
-  const scale = 10; // 1 unit = 10 mm/in
-  let dxf = "0\nSECTION\n2\nENTITIES\n";
-  
-  // Draw Straight Bar
-  const L = d.ld * scale;
-  dxf += `0\nLINE\n10\n0.0\n20\n0.0\n11\n${L}\n21\n0.0\n`;
-  
-  // Draw Hook
-  if (d.hookType == '90') {
-    dxf += `0\nLINE\n10\n${L}\n20\n0.0\n11\n${L}\n21\n${-4*d.db*scale}\n`;
-  } else if (d.hookType == '180') {
-    dxf += `0\nLINE\n10\n${L}\n20\n0.0\n11\n${L - 4*d.db*scale}\n21\n0.0\n`;
-  }
-  
-  // Text: Engineer Name
-  dxf += `0\nTEXT\n10\n0.0\n20\n${5*d.db*scale}\n40\n${2*d.db*scale}\n1\nPrepared by: ${projEng}\n`;
-  // Text: Length
-  dxf += `0\nTEXT\n10\n${L/2}\n20\n${-3*d.db*scale}\n40\n${1.5*d.db*scale}\n1\nld = ${fmt(d.ld, 2)}\n`;
-  
-  dxf += "0\nENDSEC\n0\nEOF";
-  return dxf;
-}
-
-function generateMarkdown(d) {
-  const projName = document.getElementById('proj-name').value;
-  const projItem = document.getElementById('proj-item').value;
-  const projDate = document.getElementById('proj-date').value;
-  const projEng = document.getElementById('proj-eng').value;
-  const uL = d.isMetric ? 'mm' : 'in';
-  
-  let md = `# Rebar Development Calculation\n\n`;
-  md += `**Project:** ${projName}  \n`;
-  md += `**Item:** ${projItem}  \n`;
-  md += `**Date:** ${projDate}  \n`;
-  md += `**Engineer:** ${projEng}  \n\n`;
-  
-  md += `## Results\n`;
-  md += `- **Tension Development (ld):** ${fmt(d.ld, 2)} ${uL}\n`;
-  md += `- **Tension Splice Class B (ls):** ${fmt(d.lsClassB_final, 2)} ${uL}\n`;
-  md += `- **Compression Development (ldc):** ${fmt(d.ldc, 2)} ${uL}\n`;
-  md += `- **Compression Splice (lsc):** ${fmt(d.lsc, 2)} ${uL}\n`;
-  if (d.hookType !== 'straight') md += `- **Hooked Bar (ldh):** ${fmt(d.ldh, 2)} ${uL}\n`;
-  md += `- **Headed Bar (ldh):** ${fmt(d.ldhHead, 2)} ${uL}\n`;
-  
-  return md;
-}
-
-// ====================================
-//  INITIALIZATION
-// ====================================
-document.addEventListener('DOMContentLoaded', function() {
-  try {
-    loadInputs();
-    updateUnitUI();
-    
-    const today = new Date().toISOString().split('T')[0];
-    if (!document.getElementById('proj-date').value) {
-      document.getElementById('proj-date').value = today;
-    }
-
-    document.getElementById('calc-btn').addEventListener('click', function() {
-      try {
-        calculate();
-        showToast('Calculations updated');
-      } catch (e) {
-        console.error("Calculation Error:", e);
-        showToast('Error: ' + e.message);
-      }
-    });
-
-    document.getElementById('reset-btn').addEventListener('click', function() {
-      try {
-        localStorage.removeItem('rebarCalcInputs');
-      } catch(e) {}
-      location.reload();
-    });
-
-    document.getElementById('has-transverse').addEventListener('change', function() {
-      document.getElementById('transverse-fields').style.display = this.checked ? 'grid' : 'none';
-    });
-
-    document.querySelectorAll('#unit-toggle button').forEach(btn => {
-      btn.addEventListener('click', function() {
-        currentUnitSystem = this.dataset.unit;
-        updateUnitUI();
-        calculate();
-      });
-    });
-
-    document.querySelectorAll('.tab-button').forEach(btn => {
-      btn.addEventListener('click', function() {
-        document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-        document.getElementById('tab-' + this.dataset.tab).classList.remove('hidden');
-      });
-    });
-
-    document.getElementById('copy-latex-btn').addEventListener('click', function() {
-      navigator.clipboard.writeText(document.getElementById('latex-output').textContent).then(() => showToast('LaTeX text copied'));
-    });
-
-    document.getElementById('copy-word-btn').addEventListener('click', function() {
-      document.getElementById('word-output').select();
-      navigator.clipboard.writeText(document.getElementById('word-output').value).then(() => showToast('Calculation package copied'));
-    });
-
-    // Export Buttons
-    document.getElementById('download-pdf-btn').addEventListener('click', function() {
-      const element = document.getElementById('latex-output').cloneNode(true);
-      const header = document.createElement('div');
-      header.style.textAlign = 'center';
-      header.style.marginBottom = '20px';
-      header.style.fontWeight = 'bold';
-      header.style.fontSize = '14px';
-      header.innerHTML = `<h1>Rebar Development Calculation</h1><p>Project: ${document.getElementById('proj-name').value}<br>Prepared by: ${document.getElementById('proj-eng').value}</p><hr>`;
-      element.prepend(header);
-      
-      const opt = {
-        margin: 10,
-        filename: 'rebar_calculation.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-      };
-      html2pdf().set(opt).from(element).save();
-      showToast('PDF Downloaded');
-    });
-
-    document.getElementById('download-excel-btn').addEventListener('click', function() {
-      exportToExcel();
-    });
-
-    function exportToExcel() {
-      const wb = XLSX.utils.book_new();
-      const data = window._lastCalcData;
-      
-      // Project info rows (unlocked for editing)
-      const wsData = [
-        ['Project Name:', data.projectName || ''],
-        ['Calculation Item:', data.calcItem || ''],
-        ['Date:', data.date || ''],
-        ['Engineer:', data.engineer || ''],
-        ['ACI Code:', data.aciVersion || ''],
-        ['Unit System:', data.unitSystem || ''],
-        [],
-        // Headers for calculation data
-        ['Parameter', 'Symbol', 'Value', 'Unit', 'Formula/Notes']
-      ];
-      
-      // Add input parameters
-      if (data.inputs) {
-        wsData.push(['Bar Size', 'db', data.inputs.barSize, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
-        wsData.push(['Yield Strength', 'fy', data.inputs.fy, 'psi', '']);
-        wsData.push(['Concrete Strength', "f'c", data.inputs.fc, 'psi', '']);
-        wsData.push(['Cover', 'c', data.inputs.cover, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
-        wsData.push(['Spacing', 's', data.inputs.spacing, data.unitSystem === 'imperial' ? 'in' : 'mm', '']);
-        wsData.push(['Coating Factor', 'ψe', data.inputs.coatingFactor || 1.0, '', '1.0 uncoated, 1.5 epoxy');
-        wsData.push(['Location Factor', 'ψt', data.inputs.locationFactor || 1.0, '', '1.0 top bar, 1.3 bottom');
-        wsData.push(['Size Factor', 'λ', data.inputs.sizeFactor || 1.0, '', '1.0 normal weight');
-        wsData.push([]);
-      }
-      
-      // Add results with formulas
-      if (data.results) {
-        wsData.push(['Tension Development Length', 'ld', data.results.ld, data.unitSystem === 'imperial' ? 'in' : 'mm', '=MAX((3*fy*ψe*ψt*ψs)/(40*√f\'c*λ)*(db/(c+Ktr)),12in)']);
-        wsData.push(['Compression Development', 'ldc', data.results.ldc, data.unitSystem === 'imperial' ? 'in' : 'mm', '=MAX(0.02*fy*db/√f\'c,0.0003*fy*db,8in)']);
-        wsData.push(['Class A Splice', 'lsA', data.results.lsA, data.unitSystem === 'imperial' ? 'in' : 'mm', '=1.0*ld']);
-        wsData.push(['Class B Splice', 'lsB', data.results.lsB, data.unitSystem === 'imperial' ? 'in' : 'mm', '=1.3*ld']);
-        wsData.push(['Hook Development', 'ldh', data.results.ldh, data.unitSystem === 'imperial' ? 'in' : 'mm', '=0.02*ψe*ψc*ψr*fy*db/√f\'c']);
-        wsData.push(['Headed Bar', 'ldt', data.results.ldt, data.unitSystem === 'imperial' ? 'in' : 'mm', '=0.016*ψe*fy*db/√f\'c']);
-      }
-      
-      const ws = XLSX.utils.aoa_to_sheet(wsData);
-      
-      // Set column widths
-      ws['!cols'] = [
-        { wch: 25 },
-        { wch: 10 },
-        { wch: 12 },
-        { wch: 8 },
-        { wch: 45 }
-      ];
-      
-      // Protect sheet but leave first 6 rows unlocked
-      ws['!protect'] = { password: '', selectLockedCells: true, selectUnlockedCells: true };
-      
-      // Mark first 6 rows as unlocked
-      for (let row = 0; row < 6; row++) {
-        const range = XLSX.utils.decode_range(ws['!ref']);
-        for (let col = range.s.c; col <= range.e.c; col++) {
-          const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
-          if (!ws[cellRef]) continue;
-          ws[cellRef].locked = false;
-        }
-      }
-      
-      XLSX.utils.book_append_sheet(wb, ws, 'Calculation');
-      XLSX.writeFile(wb, 'rebar_calculation.xlsx');
-      showToast('Excel Downloaded');
-    }
-
-    document.getElementById('download-dxf-btn').addEventListener('click', function() {
-      const dxfContent = generateDXF(window._lastCalcData);
-      downloadFile('rebar_detail.dxf', dxfContent);
-      showToast('DXF Downloaded');
-    });
-
-    document.getElementById('download-md-btn').addEventListener('click', function() {
-      downloadFile('rebar_calculation.md', generateMarkdown(window._lastCalcData));
-      showToast('Markdown Downloaded');
-    });
-
-    document.getElementById('download-txt-btn').addEventListener('click', function() {
-      downloadFile('rebar_calculation.txt', document.getElementById('word-output').value);
-      showToast('TXT Downloaded');
-    });
-
-    // Live update
-    document.querySelectorAll('input, select').forEach(el => {
-      el.addEventListener('change', calculate);
-    });
-
-    // Initial calc
-    function autoCalc() {
-      if (window.MathJax && MathJax.typesetPromise) {
-        calculate();
-      } else {
-        setTimeout(autoCalc, 200);
-      }
-    }
-    autoCalc();
-    
-  } catch (err) {
-    console.error("Initialization Error:", err);
-  }
-});
-</script>
 
 </body>
 </html>
