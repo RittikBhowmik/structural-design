@@ -1777,7 +1777,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('download-pdf-btn').addEventListener('click', function() {
-      // Create a temporary container with raw LaTeX source instead of MathJax-rendered output
+      // Create a temporary container with properly formatted LaTeX for PDF
       const tempContainer = document.createElement('div');
       tempContainer.style.padding = '20px';
       tempContainer.style.fontFamily = "'Inter', sans-serif";
@@ -1795,9 +1795,87 @@ document.addEventListener('DOMContentLoaded', function() {
       header.innerHTML = `<h1 style="font-size: 18px; margin-bottom: 10px; color: #0a2540;">Rebar Development Calculation</h1><p style="font-size: 12px; color: #475569;">Project: ${document.getElementById('proj-name').value}<br>Prepared by: ${document.getElementById('proj-eng').value}</p>`;
       tempContainer.appendChild(header);
       
-      // Use raw LaTeX source (before MathJax rendering) to avoid overlay issues
+      // Get raw LaTeX source and convert it to readable text for PDF
+      const rawLatex = window._latexSource || '';
       const latexContent = document.createElement('div');
-      latexContent.innerHTML = window._latexSource || '';
+      
+      // Convert LaTeX equations to readable plain text format
+      let readableContent = rawLatex;
+      
+      // Replace common LaTeX commands with readable equivalents
+      const latexReplacements = [
+        [/\\\\ell_/g, 'ℓ_'],
+        [/\\\\psi_/g, 'ψ_'],
+        [/\\\\lambda/g, 'λ'],
+        [/\\\\sqrt\{([^}]*)\}/g, '√($1)'],
+        [/\\\\frac\{([^}]*)\}\{([^}]*)\}/g, '($1)/($2)'],
+        [/\\\\cdot/g, '·'],
+        [/\\\\times/g, '×'],
+        [/\\\\geq/g, '≥'],
+        [/\\\\leq/g, '≤'],
+        [/\\\\Rightarrow/g, '⇒'],
+        [/\\\\quad/g, ' '],
+        [/\\\\text\{([^}]*)\}/g, '$1'],
+        [/\\\\min\\\\left\([^)]*\\\\right\)/g, 'min'],
+        [/\\\\max\\\\left\([^)]*\\\\right\)/g, 'max'],
+        [/\\\\left\(/g, '('],
+        [/\\\\right\)/g, ')'],
+        [/\\\\left\[/g, '['],
+        [/\\\\right\]/g, ']'],
+        [/\\\\$/g, ''],
+        [/^\$/gm, ''],
+        [/\$/g, ''],
+        [/\\\\,/g, ' '],
+        [/\\\\;/g, ' '],
+        [/\\\\!/g, ''],
+        [/\\\\%/g, '%'],
+        [/\\\\#/g, '#'],
+        [/\\\\&/g, '&'],
+        [/\\\\_/g, '_'],
+        [/\\\\{/g, '{'],
+        [/\\\\}/g, '}'],
+        [/\\\\-/g, '-'],
+        [/\^\{([^}]*)\}/g, '^$1'],
+        [/\^([0-9])/g, '^$1'],
+        [/_\{([^}]*)\}/g, '_$1'],
+        [/_{([a-z])}/g, '_$1'],
+        [/\\n/g, '<br>'],
+        [/<br>/g, '<br>'],
+        [/----/g, '<hr>']
+      ];
+      
+      latexReplacements.forEach(([pattern, replacement]) => {
+        readableContent = readableContent.replace(pattern, replacement);
+      });
+      
+      // Clean up any remaining backslashes
+      readableContent = readableContent.replace(/\\\\/g, '\\');
+      readableContent = readableContent.replace(/\\/g, '');
+      
+      // Remove HTML tags from the content but keep structure
+      readableContent = readableContent.replace(/<[^>]*>/g, '');
+      
+      // Split by lines and process each line
+      const lines = readableContent.split('\n');
+      let processedHtml = '';
+      
+      lines.forEach(line => {
+        line = line.trim();
+        if (line.length > 0) {
+          // Check if it's an equation line (contains = or mathematical operators)
+          if (line.includes('=') || line.includes('√') || line.includes('·')) {
+            processedHtml += `<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; margin: 8px 0; padding: 4px 0; border-left: 2px solid #e2e8f0; padding-left: 12px;">${line}</div>`;
+          } else if (line.includes('<hr>')) {
+            processedHtml += '<hr style="border: none; border-top: 1px solid #cbd5e1; margin: 16px 0;">';
+          } else if (line.includes('$$')) {
+            // Skip pure $$ markers
+          } else {
+            processedHtml += `<div style="margin: 6px 0;">${line}</div>`;
+          }
+        }
+      });
+      
+      latexContent.innerHTML = processedHtml;
       tempContainer.appendChild(latexContent);
       
       const opt = {
