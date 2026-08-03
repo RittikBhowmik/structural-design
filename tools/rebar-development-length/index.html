@@ -1776,7 +1776,7 @@ document.addEventListener('DOMContentLoaded', function() {
       navigator.clipboard.writeText(document.getElementById('word-output').value).then(() => showToast('Calculation package copied'));
     });
 
-        document.getElementById('download-pdf-btn').addEventListener('click', function() {
+    document.getElementById('download-pdf-btn').addEventListener('click', function() {
       const rawLatex = window._latexSource || '';
       if (!rawLatex) { alert('No calculation results to export!'); return; }
 
@@ -1785,84 +1785,102 @@ document.addEventListener('DOMContentLoaded', function() {
       pdfBtn.disabled = true;
       pdfBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
 
-      const tempContainer = document.createElement('div');
-      tempContainer.id = 'pdf-temp-container';
-      tempContainer.style.position = 'absolute';
-      tempContainer.style.left = '-10000px';
-      tempContainer.style.top = '0';
-      tempContainer.style.width = '210mm';
-      tempContainer.style.minHeight = '297mm';
-      tempContainer.style.padding = '15mm';
-      tempContainer.style.margin = '0';
-      tempContainer.style.background = 'white';
-      tempContainer.style.color = 'black';
-      tempContainer.style.fontFamily = "'Inter', sans-serif";
-      tempContainer.style.fontSize = '11pt';
-      tempContainer.style.lineHeight = '1.6';
-      tempContainer.style.boxSizing = 'border-box';
-
+      // Create a full-screen overlay for PDF capture
+      const overlay = document.createElement('div');
+      overlay.id = 'pdf-overlay';
+      overlay.style.position = 'fixed';
+      overlay.style.top = '0';
+      overlay.style.left = '0';
+      overlay.style.width = '100vw';
+      overlay.style.height = '100vh';
+      overlay.style.background = 'white';
+      overlay.style.zIndex = '999999';
+      overlay.style.padding = '40px';
+      overlay.style.boxSizing = 'border-box';
+      overlay.style.overflow = 'auto';
+      overlay.style.fontFamily = "'Inter', sans-serif";
+      
+      const container = document.createElement('div');
+      container.style.maxWidth = '210mm';
+      container.style.margin = '0 auto';
+      container.style.background = 'white';
+      container.style.color = 'black';
+      
       const header = document.createElement('div');
       header.style.textAlign = 'center';
-      header.style.marginBottom = '25px';
-      header.style.paddingBottom = '15px';
-      header.style.borderBottom = '2px solid #0a2540';
-      header.innerHTML = `<h1 style="font-size: 18px; margin-bottom: 10px; color: #0a2540;">Rebar Development Length Calculation</h1><p style="font-size: 11pt; color: #475569; line-height: 1.5;">Project: ${document.getElementById('proj-name').value}<br>Prepared by: ${document.getElementById('proj-eng').value}<br>Date: ${document.getElementById('proj-date').value}</p>`;
-      tempContainer.appendChild(header);
-
+      header.style.marginBottom = '30px';
+      header.style.paddingBottom = '20px';
+      header.style.borderBottom = '3px solid #0a2540';
+      header.innerHTML = `<h1 style="font-size: 22px; margin-bottom: 12px; color: #0a2540;">Rebar Development Length Calculation</h1><p style="font-size: 13px; color: #475569; line-height: 1.6;">Project: ${document.getElementById('proj-name').value}<br>Prepared by: ${document.getElementById('proj-eng').value}<br>Date: ${document.getElementById('proj-date').value}</p>`;
+      container.appendChild(header);
+      
       const latexContent = document.createElement('div');
       latexContent.style.background = 'white';
       latexContent.style.color = 'black';
-      latexContent.style.padding = '0';
-      latexContent.style.margin = '0';
+      latexContent.style.padding = '20px 0';
       latexContent.innerHTML = rawLatex;
-      tempContainer.appendChild(latexContent);
-
-      document.body.appendChild(tempContainer);
+      container.appendChild(latexContent);
+      
+      overlay.appendChild(container);
+      document.body.appendChild(overlay);
+      document.body.style.overflow = 'hidden';
 
       if (window.MathJax && MathJax.typesetPromise) {
         MathJax.typesetPromise([latexContent]).then(() => {
           setTimeout(() => {
-            const opt = {
-              margin: [10, 10, 10, 10],
-              filename: 'rebar_development_length.pdf',
-              image: { type: 'jpeg', quality: 1 },
-              html2canvas: {
-                scale: 2,
-                useCORS: true,
-                scrollY: 0,
-                scrollX: 0,
-                logging: false,
-                windowWidth: 794,
-                windowHeight: 1123,
-                ignoreElements: function(element) { return element.tagName === 'BUTTON'; }
-              },
-              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
-              pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-            };
-
-            html2pdf().set(opt).from(tempContainer).toPdf().then(function(pdf) {
-              document.body.removeChild(tempContainer);
+            html2canvas(overlay, {
+              scale: 2,
+              useCORS: true,
+              logging: false,
+              backgroundColor: '#ffffff'
+            }).then(canvas => {
+              const imgData = canvas.toDataURL('image/png');
+              const pdf = new jsPDF('p', 'mm', 'a4');
+              
+              const imgWidth = 210 - 40;
+              const pageHeight = 297;
+              const imgHeight = (canvas.height * imgWidth) / canvas.width;
+              
+              let heightLeft = imgHeight;
+              let position = 20;
+              
+              pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+              heightLeft -= pageHeight;
+              
+              while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+              }
+              
+              pdf.save('rebar_development_length.pdf');
+              
+              document.body.removeChild(overlay);
+              document.body.style.overflow = '';
               pdfBtn.disabled = false;
               pdfBtn.innerHTML = originalText;
-              pdf.save();
               showToast('PDF Downloaded Successfully');
-            }).catch(function(err) {
-              console.error("PDF generation error:", err);
-              document.body.removeChild(tempContainer);
+            }).catch(err => {
+              console.error("Canvas error:", err);
+              document.body.removeChild(overlay);
+              document.body.style.overflow = '';
               pdfBtn.disabled = false;
               pdfBtn.innerHTML = originalText;
               alert('Error generating PDF: ' + err.message);
             });
-          }, 1000);
-        }).catch((err) => {
-          console.error("MathJax typeset error:", err);
-          document.body.removeChild(tempContainer);
+          }, 800);
+        }).catch(err => {
+          console.error("MathJax error:", err);
+          document.body.removeChild(overlay);
+          document.body.style.overflow = '';
           pdfBtn.disabled = false;
           pdfBtn.innerHTML = originalText;
           alert('Error generating PDF: ' + err.message);
         });
       } else {
-        document.body.removeChild(tempContainer);
+        document.body.removeChild(overlay);
+        document.body.style.overflow = '';
         pdfBtn.disabled = false;
         pdfBtn.innerHTML = originalText;
         alert('MathJax not loaded. Cannot generate PDF.');
