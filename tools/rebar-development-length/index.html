@@ -1779,18 +1779,21 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('download-pdf-btn').addEventListener('click', function() {
       // Create a temporary container with properly formatted LaTeX for PDF
       const tempContainer = document.createElement('div');
-      tempContainer.style.padding = '20px';
+      tempContainer.style.padding = '0';
+      tempContainer.style.margin = '0';
       tempContainer.style.fontFamily = "'Inter', sans-serif";
       tempContainer.style.fontSize = '12px';
       tempContainer.style.lineHeight = '1.6';
       tempContainer.style.color = '#0f172a';
       tempContainer.style.background = 'white';
+      tempContainer.style.width = '210mm'; // A4 width
+      tempContainer.style.boxSizing = 'border-box';
       
       // Add header
       const header = document.createElement('div');
       header.style.textAlign = 'center';
-      header.style.marginBottom = '30px';
-      header.style.paddingBottom = '20px';
+      header.style.marginBottom = '20px';
+      header.style.paddingBottom = '15px';
       header.style.borderBottom = '2px solid #0a2540';
       header.innerHTML = `<h1 style="font-size: 18px; margin-bottom: 10px; color: #0a2540;">Rebar Development Calculation</h1><p style="font-size: 12px; color: #475569;">Project: ${document.getElementById('proj-name').value}<br>Prepared by: ${document.getElementById('proj-eng').value}</p>`;
       tempContainer.appendChild(header);
@@ -1879,14 +1882,16 @@ document.addEventListener('DOMContentLoaded', function() {
       tempContainer.appendChild(latexContent);
       
       const opt = {
-        margin: 10,
+        margin: [10, 10, 10, 10],
         filename: 'rebar_calculation.pdf',
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, allowTaint: false },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        html2canvas: { scale: 2, useCORS: true, allowTaint: false, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
       };
-      html2pdf().set(opt).from(tempContainer).save();
-      showToast('PDF Downloaded');
+      html2pdf().set(opt).from(tempContainer).toPdf().then(() => {
+        showToast('PDF Downloaded');
+      }).save();
     });
 
     document.getElementById('download-excel-btn').addEventListener('click', exportToExcel);
