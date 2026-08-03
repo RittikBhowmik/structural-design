@@ -1798,100 +1798,31 @@ document.addEventListener('DOMContentLoaded', function() {
       header.innerHTML = `<h1 style="font-size: 18px; margin-bottom: 10px; color: #0a2540;">Rebar Development Calculation</h1><p style="font-size: 12px; color: #475569;">Project: ${document.getElementById('proj-name').value}<br>Prepared by: ${document.getElementById('proj-eng').value}</p>`;
       tempContainer.appendChild(header);
       
-      // Get raw LaTeX source and convert it to readable text for PDF
+      // Get raw LaTeX source and render it properly for PDF
       const rawLatex = window._latexSource || '';
       const latexContent = document.createElement('div');
+      latexContent.className = 'pdf-latex-content';
+      latexContent.style.background = 'white';
+      latexContent.style.padding = '20px';
       
-      // Convert LaTeX equations to readable plain text format
-      let readableContent = rawLatex;
-      
-      // Replace common LaTeX commands with readable equivalents
-      const latexReplacements = [
-        [/\\\\ell_/g, 'ℓ_'],
-        [/\\\\psi_/g, 'ψ_'],
-        [/\\\\lambda/g, 'λ'],
-        [/\\\\sqrt\{([^}]*)\}/g, '√($1)'],
-        [/\\\\frac\{([^}]*)\}\{([^}]*)\}/g, '($1)/($2)'],
-        [/\\\\cdot/g, '·'],
-        [/\\\\times/g, '×'],
-        [/\\\\geq/g, '≥'],
-        [/\\\\leq/g, '≤'],
-        [/\\\\Rightarrow/g, '⇒'],
-        [/\\\\quad/g, ' '],
-        [/\\\\text\{([^}]*)\}/g, '$1'],
-        [/\\\\min\\\\left\([^)]*\\\\right\)/g, 'min'],
-        [/\\\\max\\\\left\([^)]*\\\\right\)/g, 'max'],
-        [/\\\\left\(/g, '('],
-        [/\\\\right\)/g, ')'],
-        [/\\\\left\[/g, '['],
-        [/\\\\right\]/g, ']'],
-        [/\\\\$/g, ''],
-        [/^\$/gm, ''],
-        [/\$/g, ''],
-        [/\\\\,/g, ' '],
-        [/\\\\;/g, ' '],
-        [/\\\\!/g, ''],
-        [/\\\\%/g, '%'],
-        [/\\\\#/g, '#'],
-        [/\\\\&/g, '&'],
-        [/\\\\_/g, '_'],
-        [/\\\\{/g, '{'],
-        [/\\\\}/g, '}'],
-        [/\\\\-/g, '-'],
-        [/\^\{([^}]*)\}/g, '^$1'],
-        [/\^([0-9])/g, '^$1'],
-        [/_\{([^}]*)\}/g, '_$1'],
-        [/_{([a-z])}/g, '_$1'],
-        [/\\n/g, '<br>'],
-        [/<br>/g, '<br>'],
-        [/----/g, '<hr>']
-      ];
-      
-      latexReplacements.forEach(([pattern, replacement]) => {
-        readableContent = readableContent.replace(pattern, replacement);
-      });
-      
-      // Clean up any remaining backslashes
-      readableContent = readableContent.replace(/\\\\/g, '\\');
-      readableContent = readableContent.replace(/\\/g, '');
-      
-      // Remove HTML tags from the content but keep structure
-      readableContent = readableContent.replace(/<[^>]*>/g, '');
-      
-      // Split by lines and process each line
-      const lines = readableContent.split('\n');
-      let processedHtml = '';
-      
-      lines.forEach(line => {
-        line = line.trim();
-        if (line.length > 0) {
-          // Check if it's an equation line (contains = or mathematical operators)
-          if (line.includes('=') || line.includes('√') || line.includes('·')) {
-            processedHtml += `<div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; margin: 8px 0; padding: 4px 0; border-left: 2px solid #e2e8f0; padding-left: 12px;">${line}</div>`;
-          } else if (line.includes('<hr>')) {
-            processedHtml += '<hr style="border: none; border-top: 1px solid #cbd5e1; margin: 16px 0;">';
-          } else if (line.includes('$$')) {
-            // Skip pure $$ markers
-          } else {
-            processedHtml += `<div style="margin: 6px 0;">${line}</div>`;
-          }
-        }
-      });
-      
-      latexContent.innerHTML = processedHtml;
+      // Insert raw LaTeX - MathJax will typeset it
+      latexContent.innerHTML = rawLatex;
       tempContainer.appendChild(latexContent);
       
-      const opt = {
-        margin: [10, 10, 10, 10],
-        filename: 'rebar_calculation.pdf',
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true, allowTaint: false, scrollY: 0 },
-        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
-      };
-      html2pdf().set(opt).from(tempContainer).toPdf().then(() => {
-        showToast('PDF Downloaded');
-      }).save();
+      // Typeset the LaTeX content before generating PDF
+      MathJax.typesetPromise([latexContent]).then(() => {
+        const opt = {
+          margin: [10, 10, 10, 10],
+          filename: 'rebar_calculation.pdf',
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2, useCORS: true, allowTaint: false, scrollY: 0 },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+        };
+        html2pdf().set(opt).from(tempContainer).toPdf().then(() => {
+          showToast('PDF Downloaded');
+        }).save();
+      });
     });
 
     document.getElementById('download-excel-btn').addEventListener('click', exportToExcel);
