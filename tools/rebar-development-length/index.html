@@ -242,6 +242,10 @@
 
   mjx-container { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
   mjx-container[display="true"] { margin: 6px 0 !important; }
+  
+  /* Hide MathJax typesetting markers during PDF export */
+  .mjx-hidden-for-pdf mjx-container { display: none !important; }
+  .mjx-hidden-for-pdf .MathJax { display: none !important; }
 
   .copy-textarea {
     width: 100%;
@@ -1507,12 +1511,13 @@ function buildLatexOutput(d) {
   const container = document.getElementById('latex-output');
   container.innerHTML = h;
 
+  // Store raw LaTeX source for PDF export (before MathJax renders)
+  window._latexSource = h;
+
   if (window.MathJax && MathJax.typesetPromise) {
     try {
       MathJax.typesetClear([container]);
-      MathJax.typesetPromise([container]).then(() => {
-        window._latexSource = h;
-      }).catch((err) => console.error(err));
+      MathJax.typesetPromise([container]).catch((err) => console.error(err));
     } catch (e) {
       console.error("MathJax typeset error:", e);
     }
@@ -1772,23 +1777,37 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('download-pdf-btn').addEventListener('click', function() {
-      const element = document.getElementById('latex-output').cloneNode(true);
+      // Create a temporary container with raw LaTeX source instead of MathJax-rendered output
+      const tempContainer = document.createElement('div');
+      tempContainer.style.padding = '20px';
+      tempContainer.style.fontFamily = "'Inter', sans-serif";
+      tempContainer.style.fontSize = '12px';
+      tempContainer.style.lineHeight = '1.6';
+      tempContainer.style.color = '#0f172a';
+      tempContainer.style.background = 'white';
+      
+      // Add header
       const header = document.createElement('div');
       header.style.textAlign = 'center';
-      header.style.marginBottom = '20px';
-      header.style.fontWeight = 'bold';
-      header.style.fontSize = '14px';
-      header.innerHTML = `<h1>Rebar Development Calculation</h1><p>Project: ${document.getElementById('proj-name').value}<br>Prepared by: ${document.getElementById('proj-eng').value}</p><hr>`;
-      element.prepend(header);
+      header.style.marginBottom = '30px';
+      header.style.paddingBottom = '20px';
+      header.style.borderBottom = '2px solid #0a2540';
+      header.innerHTML = `<h1 style="font-size: 18px; margin-bottom: 10px; color: #0a2540;">Rebar Development Calculation</h1><p style="font-size: 12px; color: #475569;">Project: ${document.getElementById('proj-name').value}<br>Prepared by: ${document.getElementById('proj-eng').value}</p>`;
+      tempContainer.appendChild(header);
+      
+      // Use raw LaTeX source (before MathJax rendering) to avoid overlay issues
+      const latexContent = document.createElement('div');
+      latexContent.innerHTML = window._latexSource || '';
+      tempContainer.appendChild(latexContent);
       
       const opt = {
         margin: 10,
         filename: 'rebar_calculation.pdf',
         image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { scale: 2 },
+        html2canvas: { scale: 2, useCORS: true, allowTaint: false },
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
       };
-      html2pdf().set(opt).from(element).save();
+      html2pdf().set(opt).from(tempContainer).save();
       showToast('PDF Downloaded');
     });
 
