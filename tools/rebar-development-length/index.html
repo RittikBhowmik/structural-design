@@ -1787,8 +1787,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
       const tempContainer = document.createElement('div');
       tempContainer.id = 'pdf-temp-container';
-      tempContainer.style.position = 'fixed';
-      tempContainer.style.left = '0';
+      tempContainer.style.position = 'absolute';
+      tempContainer.style.left = '-10000px';
       tempContainer.style.top = '0';
       tempContainer.style.width = '210mm';
       tempContainer.style.minHeight = '297mm';
@@ -1799,8 +1799,6 @@ document.addEventListener('DOMContentLoaded', function() {
       tempContainer.style.fontFamily = "'Inter', sans-serif";
       tempContainer.style.fontSize = '11pt';
       tempContainer.style.lineHeight = '1.6';
-      tempContainer.style.zIndex = '-9999';
-      tempContainer.style.visibility = 'hidden';
       tempContainer.style.boxSizing = 'border-box';
 
       const header = document.createElement('div');
