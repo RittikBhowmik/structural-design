@@ -1786,8 +1786,9 @@ document.addEventListener('DOMContentLoaded', function() {
       pdfBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
 
       const tempContainer = document.createElement('div');
+      tempContainer.id = 'pdf-temp-container';
       tempContainer.style.position = 'fixed';
-      tempContainer.style.left = '-9999px';
+      tempContainer.style.left = '0';
       tempContainer.style.top = '0';
       tempContainer.style.width = '210mm';
       tempContainer.style.minHeight = '297mm';
@@ -1798,7 +1799,8 @@ document.addEventListener('DOMContentLoaded', function() {
       tempContainer.style.fontFamily = "'Inter', sans-serif";
       tempContainer.style.fontSize = '11pt';
       tempContainer.style.lineHeight = '1.6';
-      tempContainer.style.zIndex = '9999';
+      tempContainer.style.zIndex = '-9999';
+      tempContainer.style.visibility = 'hidden';
       tempContainer.style.boxSizing = 'border-box';
 
       const header = document.createElement('div');
@@ -1840,7 +1842,7 @@ document.addEventListener('DOMContentLoaded', function() {
               pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
-            html2pdf().set(opt).from(latexContent).toPdf().then(function(pdf) {
+            html2pdf().set(opt).from(tempContainer).toPdf().then(function(pdf) {
               document.body.removeChild(tempContainer);
               pdfBtn.disabled = false;
               pdfBtn.innerHTML = originalText;
