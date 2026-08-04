@@ -347,6 +347,128 @@
     background: var(--primary);
     color: white;
   }
+
+  /* Print Modal Styles */
+  .print-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 37, 64, 0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+  .print-modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+  }
+  .print-modal {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 1000px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    transform: scale(0.95);
+    transition: transform 0.3s;
+  }
+  .print-modal-overlay.active .print-modal {
+    transform: scale(1);
+  }
+  .print-modal-header {
+    background: var(--primary);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 8px 8px 0 0;
+  }
+  .print-modal-header h2 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .print-modal-close {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+  .print-modal-close:hover {
+    background: rgba(255,255,255,0.1);
+  }
+  .print-modal-toolbar {
+    padding: 12px 20px;
+    background: #f8fafc;
+    border-bottom: 1px solid var(--line-light);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-radius: 0;
+  }
+  .print-modal-body {
+    flex: 1;
+    overflow: auto;
+    padding: 0;
+    background: #f1f5f9;
+  }
+  .print-preview-content {
+    background: white;
+    margin: 20px;
+    padding: 40px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    min-height: calc(90vh - 180px);
+  }
+  .print-preview-content .header {
+    background: linear-gradient(135deg, #0a2540 0%, #14365e 100%);
+    color: white;
+    padding: 24px;
+    margin: -40px -40px 30px -40px;
+    border-radius: 4px 4px 0 0;
+  }
+  .print-preview-content .header h1 {
+    font-family: 'Roboto Slab', serif;
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 12px 0;
+  }
+  .print-preview-content .header-info {
+    font-size: 13px;
+    line-height: 1.6;
+    opacity: 0.9;
+  }
+  .print-preview-content .content {
+    color: #0f172a;
+    line-height: 1.8;
+  }
+  .print-preview-content mjx-container {
+    overflow-x: auto;
+    padding: 4px 0;
+  }
+  .print-preview-content mjx-container[display="true"] {
+    margin: 10px 0 !important;
+  }
 </style>
 </head>
 <body>
@@ -1962,17 +2084,95 @@ function printFromModal() {
   const previewContent = document.getElementById('print-preview-content');
   if (!previewContent) return;
   
-  // Extract the inner HTML and create a new window for printing
-  const printContent = previewContent.innerHTML;
-  const printWindow = window.open('', '_blank');
-  printWindow.document.write(printContent);
-  printWindow.document.close();
+  // Get the project info from the modal header
+  const projectName = document.getElementById('proj-name')?.value || 'Project';
+  const projectItem = document.getElementById('proj-item')?.value || 'Calculation';
+  const projectEng = document.getElementById('proj-eng')?.value || 'Engineer';
+  const projectDate = document.getElementById('proj-date')?.value || new Date().toISOString().split('T')[0];
   
-  // Wait for MathJax to render then print
-  setTimeout(() => {
-    printWindow.focus();
-    printWindow.print();
-  }, 500);
+  // Get the calculation content (the inner div.content)
+  const contentHTML = previewContent.querySelector('.content')?.innerHTML || previewContent.innerHTML;
+  
+  // Create a complete HTML document for printing
+  const printHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rebar Calculation - ${projectName}</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #0f172a;
+      background: #fff;
+      padding: 40px;
+      max-width: 210mm;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 3px solid #0a2540;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-size: 24px;
+      color: #0a2540;
+      margin-bottom: 15px;
+    }
+    .header-info {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.8;
+    }
+    .content {
+      background: white;
+      color: black;
+      padding: 20px 0;
+    }
+    mjx-container { overflow-x: auto; padding: 4px 0; }
+    mjx-container[display="true"] { margin: 10px 0 !important; }
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      @page { margin: 20mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Rebar Development Length Calculation</h1>
+    <div class="header-info">
+      <strong>Project:</strong> ${projectName}<br>
+      <strong>Item:</strong> ${projectItem}<br>
+      <strong>Prepared by:</strong> ${projectEng}<br>
+      <strong>Date:</strong> ${projectDate}
+    </div>
+  </div>
+  
+  <div class="content">
+    ${contentHTML}
+  </div>
+  
+  <script>
+    window.addEventListener('load', function() {
+      if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise().then(() => {
+          window.print();
+        });
+      } else {
+        setTimeout(() => window.print(), 500);
+      }
+    });
+  <\/script>
+</body>
+</html>`;
+  
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(printHTML);
+  printWindow.document.close();
 }
 </script>
 
