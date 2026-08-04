@@ -3,465 +3,92 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LaTeX to Word Converter - Structural Engineering Tools</title>
+    <title>LaTeX to Word Converter - Structural Design</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #34495e;
-            --accent: #3498db;
-            --light: #ecf0f1;
-            --dark: #2c3e50;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f6fa;
-            color: var(--dark);
-            line-height: 1.6;
-            padding: 2rem;
-        }
-        
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-        
-        h1 {
-            font-size: 2rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-        
-        .subtitle {
-            color: #7f8c8d;
-            font-size: 1rem;
-        }
-        
-        .converter-container {
-            background: white;
-            border-radius: 8px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border-top: 4px solid var(--accent);
-        }
-        
-        .input-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: var(--secondary);
-        }
-        
-        textarea {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #dfe6e9;
-            border-radius: 4px;
-            font-size: 1rem;
-            resize: vertical;
-            transition: border-color 0.2s;
-        }
-        
-        textarea:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        
-        #latexInput {
-            min-height: 150px;
-            font-family: 'Courier New', monospace;
-        }
-        
-        #wordOutput {
-            min-height: 150px;
-            background-color: #f8f9fa;
-            font-family: 'Times New Roman', serif;
-            font-size: 1.2rem;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: var(--accent);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 600;
-            text-align: center;
-            transition: background-color 0.2s;
-            border: none;
-            cursor: pointer;
-            flex: 1;
-        }
-        
-        .btn:hover {
-            background-color: #2980b9;
-        }
-        
-        .btn-secondary {
-            background-color: #95a5a6;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #7f8c8d;
-        }
-        
-        .btn-success {
-            background-color: #27ae60;
-        }
-        
-        .btn-success:hover {
-            background-color: #219a52;
-        }
-        
-        .info-section {
-            background-color: #e8f4f8;
-            border-left: 4px solid var(--accent);
-            padding: 1rem;
-            margin-top: 1.5rem;
-            border-radius: 4px;
-        }
-        
-        .info-section h3 {
-            color: var(--secondary);
-            margin-bottom: 0.5rem;
-            font-size: 1rem;
-        }
-        
-        .info-section ul {
-            margin-left: 1.5rem;
-            color: #555;
-            font-size: 0.9rem;
-        }
-        
-        .info-section li {
-            margin-bottom: 0.3rem;
-        }
-        
-        .back-link {
-            display: inline-block;
-            margin-bottom: 1rem;
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
-        .back-link:hover {
-            text-decoration: underline;
-        }
-        
-        .examples {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-        
-        .example-item {
-            background: #f8f9fa;
-            padding: 0.8rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        
-        .example-item:hover {
-            background-color: #e8f4f8;
-        }
-        
-        .example-label {
-            font-size: 0.8rem;
-            color: #7f8c8d;
-            margin-bottom: 0.3rem;
-        }
-        
-        .example-latex {
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            color: var(--secondary);
-        }
+        :root{--vercel-black:#171717;--pure-white:#FFFFFF;--off-black:#000000;--electric-blue:#0070F3;--medium-gray:#4D4D4D;--light-border:#EBEBEB;--soft-background:#FAFAFA;--off-white:#EDEDED;--surface-base:#FFFFFF;--border-default:#EBEBEB;--disabled-state:#E8E8E8}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Inter',system-ui,-apple-system,sans-serif;background-color:var(--pure-white);color:var(--vercel-black);line-height:1.6;min-height:100vh}
+        .nav{background:var(--pure-white);border-bottom:1px solid var(--border-default);height:64px;position:sticky;top:0;z-index:100}
+        .nav-container{max-width:1400px;margin:0 auto;padding:0 32px;height:100%;display:flex;align-items:center;justify-content:space-between}
+        .nav-brand{font-size:16px;font-weight:500;color:var(--vercel-black);text-decoration:none;display:flex;align-items:center;gap:8px}
+        .nav-brand:hover{color:var(--electric-blue)}
+        .nav-links{display:flex;gap:24px;align-items:center}
+        .nav-link{font-size:16px;font-weight:400;color:var(--vercel-black);text-decoration:none;padding:8px;transition:color 0.2s}
+        .nav-link:hover{color:var(--electric-blue)}
+        .container{max-width:1400px;margin:0 auto;padding:48px 32px}
+        .page-header{margin-bottom:48px}
+        .breadcrumb{display:flex;align-items:center;gap:8px;margin-bottom:16px;font-size:14px}
+        .breadcrumb a{color:var(--electric-blue);text-decoration:none}
+        .breadcrumb a:hover{text-decoration:underline}
+        .breadcrumb-separator{color:var(--medium-gray)}
+        h1{font-size:40px;font-weight:450;line-height:48px;color:var(--vercel-black);margin-bottom:12px}
+        .subtitle{font-size:20px;font-weight:400;line-height:36px;color:var(--medium-gray)}
+        .card{background:var(--surface-base);border:1px solid var(--border-default);border-radius:6px;padding:24px;box-shadow:rgba(0,0,0,0.08) 0px 0px 0px 1px,rgba(0,0,0,0.02) 0px 1px 1px 0px,rgba(0,0,0,0.04) 0px 4px 8px 0px}
+        .input-group{margin-bottom:24px}
+        label{display:block;margin-bottom:8px;font-size:14px;font-weight:500;color:var(--vercel-black)}
+        textarea{width:100%;padding:12px 16px;border:1px solid var(--border-default);border-radius:4px;font-size:14px;font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace;resize:vertical;transition:all 0.2s;background:var(--pure-white);color:var(--vercel-black)}
+        textarea:focus{outline:none;border-color:var(--electric-blue);box-shadow:0px 0px 0px 3px rgba(0,112,243,0.1)}
+        textarea::placeholder{color:var(--medium-gray)}
+        #latexInput{min-height:150px}
+        #wordOutput{min-height:150px;background-color:var(--soft-background);font-family:'Times New Roman',serif;font-size:16px}
+        .button-group{display:flex;gap:12px;margin-bottom:24px;flex-wrap:wrap}
+        .btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 24px;font-size:14px;font-weight:500;line-height:20px;border-radius:4px;border:none;cursor:pointer;transition:all 0.2s;text-decoration:none;min-height:44px}
+        .btn-primary{background:var(--vercel-black);color:var(--pure-white);border:1px solid var(--vercel-black)}
+        .btn-primary:hover{background:var(--off-black);opacity:0.9}
+        .btn-secondary{background:var(--pure-white);color:var(--vercel-black);border:1px solid var(--border-default);box-shadow:rgba(0,0,0,0.08) 0px 0px 0px 1px,rgba(0,0,0,0.02) 0px 1px 1px 0px,rgba(0,0,0,0.04) 0px 4px 8px 0px}
+        .btn-secondary:hover{background:var(--soft-background);border-color:var(--off-white)}
+        .btn-accent{background:var(--electric-blue);color:var(--pure-white);box-shadow:0px 0px 0px 4px rgba(0,112,243,0.1)}
+        .btn-accent:hover{background:#0059CC;box-shadow:0px 0px 0px 4px rgba(0,112,243,0.2)}
+        .info-section{background:var(--soft-background);border-left:4px solid var(--electric-blue);padding:24px;border-radius:4px;margin-top:32px}
+        .info-section h3{font-size:16px;font-weight:500;color:var(--vercel-black);margin-bottom:12px}
+        .info-section ul{margin-left:20px;color:var(--medium-gray);font-size:14px;line-height:24px}
+        .info-section li{margin-bottom:8px}
+        .info-section strong{color:var(--vercel-black)}
+        .examples{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:16px}
+        .example-item{background:var(--soft-background);padding:16px;border-radius:6px;border:1px solid var(--border-default);cursor:pointer;transition:all 0.2s}
+        .example-item:hover{background:var(--pure-white);border-color:var(--electric-blue);box-shadow:0px 0px 0px 4px rgba(0,112,243,0.1)}
+        .example-label{font-size:12px;font-weight:500;color:var(--medium-gray);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+        .example-latex{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--vercel-black);word-break:break-all}
+        @media(max-width:768px){.container{padding:32px 24px}.nav-container{padding:0 24px}h1{font-size:32px;line-height:40px}.subtitle{font-size:16px;line-height:24px}.button-group{flex-direction:column}.btn{width:100%}.examples{grid-template-columns:1fr}}
     </style>
 </head>
 <body>
+    <nav class="nav"><div class="nav-container"><a href="../../index.html" class="nav-brand"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L2 22h20L12 2zm0 3.5L18.5 20H5.5L12 5.5z"/></svg>Structural Design</a><div class="nav-links"><a href="../../index.html" class="nav-link">Home</a><a href="../rebar-development-length/index.html" class="nav-link">Rebar Calculator</a></div></div></nav>
     <div class="container">
-        <a href="../../index.html" class="back-link">&larr; Back to Tools</a>
-        
-        <header>
+        <div class="page-header">
+            <div class="breadcrumb"><a href="../../index.html">Home</a><span class="breadcrumb-separator">/</span><span>LaTeX to Word Converter</span></div>
             <h1>LaTeX to Word Converter</h1>
             <p class="subtitle">Convert LaTeX equations to Microsoft Word compatible format</p>
-        </header>
-        
-        <div class="converter-container">
-            <div class="input-group">
-                <label for="latexInput">Paste your LaTeX equation:</label>
-                <textarea id="latexInput" placeholder="E.g., \frac{a+b}{c}, x^2, \sqrt{x}, \sum_{i=1}^{n}, etc."></textarea>
-            </div>
-            
-            <div class="button-group">
-                <button class="btn" onclick="convertToWord()">Convert to Word Format</button>
-                <button class="btn btn-secondary" onclick="clearAll()">Clear</button>
-                <button class="btn btn-success" onclick="copyToClipboard()">Copy Output</button>
-            </div>
-            
-            <div class="input-group">
-                <label for="wordOutput">Word-compatible output (paste into MS Word):</label>
-                <textarea id="wordOutput" readonly placeholder="Converted equation will appear here..."></textarea>
-            </div>
-            
+        </div>
+        <div class="card">
+            <div class="input-group"><label for="latexInput">Paste your LaTeX equation:</label><textarea id="latexInput" placeholder="E.g., \frac{a+b}{c}, x^2, \sqrt{x}, \sum_{i=1}^{n}, etc."></textarea></div>
+            <div class="button-group"><button class="btn btn-primary" onclick="convertToWord()">Convert to Word Format</button><button class="btn btn-secondary" onclick="clearAll()">Clear</button><button class="btn btn-accent" onclick="copyToClipboard()">Copy Output</button></div>
+            <div class="input-group"><label for="wordOutput">Word-compatible output (paste into MS Word):</label><textarea id="wordOutput" readonly placeholder="Converted equation will appear here..."></textarea></div>
             <div class="info-section">
                 <h3>How to use in Microsoft Word:</h3>
-                <ul>
-                    <li>Click "Copy Output" to copy the converted equation</li>
-                    <li>In Word, press <strong>Alt + =</strong> to insert an equation</li>
-                    <li>Paste the copied text into the equation editor</li>
-                    <li>Press Enter to convert it to a professional equation</li>
-                </ul>
-                
-                <h3 style="margin-top: 1rem;">Quick Examples (click to try):</h3>
+                <ul><li>Click "Copy Output" to copy the converted equation</li><li>In Word, press <strong>Alt + =</strong> to insert an equation</li><li>Paste the copied text into the equation editor</li><li>Press Enter to convert it to a professional equation</li></ul>
+                <h3 style="margin-top:24px">Quick Examples (click to try):</h3>
                 <div class="examples">
-                    <div class="example-item" onclick="useExample('\\frac{a+b}{c}')">
-                        <div class="example-label">Fraction</div>
-                        <div class="example-latex">\frac{a+b}{c}</div>
-                    </div>
-                    <div class="example-item" onclick="useExample('x^2 + y^2 = z^2')">
-                        <div class="example-label">Pythagorean</div>
-                        <div class="example-latex">x^2 + y^2 = z^2</div>
-                    </div>
-                    <div class="example-item" onclick="useExample('\\sqrt{x^2 + y^2}')">
-                        <div class="example-label">Square Root</div>
-                        <div class="example-latex">\sqrt{x^2 + y^2}</div>
-                    </div>
-                    <div class="example-item" onclick="useExample('\\sum_{i=1}^{n} x_i')">
-                        <div class="example-label">Summation</div>
-                        <div class="example-latex">\sum_{i=1}^{n} x_i</div>
-                    </div>
-                    <div class="example-item" onclick="useExample('\\int_{0}^{\\infty} e^{-x} dx')">
-                        <div class="example-label">Integral</div>
-                        <div class="example-latex">\int_{0}^{\infty} e^{-x} dx</div>
-                    </div>
-                    <div class="example-item" onclick="useExample('\\alpha + \\beta = \\gamma')">
-                        <div class="example-label">Greek Letters</div>
-                        <div class="example-latex">\alpha + \beta = \gamma</div>
-                    </div>
+                    <div class="example-item" onclick="useExample('\\frac{a+b}{c}')"><div class="example-label">Fraction</div><div class="example-latex">\frac{a+b}{c}</div></div>
+                    <div class="example-item" onclick="useExample('x^2 + y^2 = z^2')"><div class="example-label">Pythagorean</div><div class="example-latex">x^2 + y^2 = z^2</div></div>
+                    <div class="example-item" onclick="useExample('\\sqrt{x^2 + y^2}')"><div class="example-label">Square Root</div><div class="example-latex">\sqrt{x^2 + y^2}</div></div>
+                    <div class="example-item" onclick="useExample('\\sum_{i=1}^{n} x_i')"><div class="example-label">Summation</div><div class="example-latex">\sum_{i=1}^{n} x_i</div></div>
+                    <div class="example-item" onclick="useExample('\\int_{0}^{\\infty} e^{-x} dx')"><div class="example-label">Integral</div><div class="example-latex">\int_{0}^{\infty} e^{-x} dx</div></div>
+                    <div class="example-item" onclick="useExample('\\alpha + \\beta = \\gamma')"><div class="example-label">Greek Letters</div><div class="example-latex">\alpha + \beta = \gamma</div></div>
                 </div>
             </div>
         </div>
     </div>
-    
     <script>
-        function convertLatexToWord(latex) {
-            let result = latex;
-            
-            // Remove common LaTeX wrappers
-            result = result.replace(/\\\[|\\\]/g, '');
-            result = result.replace(/\\\(|\\\)/g, '');
-            result = result.replace(/\$\$/g, '');
-            result = result.replace(/\$/g, '');
-            result = result.replace(/\\begin\{.*?\}|\\end\{.*?\}/g, '');
-
-            // Remove \text{} and \mathrm{} content wrappers but keep the text inside
-            result = result.replace(/\\text\{([^{}]*)\}/g, '$1');
-            result = result.replace(/\\mathrm\{([^{}]*)\}/g, '$1');
-            
-            // Remove formatting commands like \mathbf{}, \mathit{}, \boldsymbol{}, etc.
-            result = result.replace(/\\mathbf\{([^{}]*)\}/g, '$1');
-            result = result.replace(/\\mathit\{([^{}]*)\}/g, '$1');
-            result = result.replace(/\\boldsymbol\{([^{}]*)\}/g, '$1');
-            result = result.replace(/\\emph\{([^{}]*)\}/g, '$1');
-            result = result.replace(/\\textbf\{([^{}]*)\}/g, '$1');
-            result = result.replace(/\\textit\{([^{}]*)\}/g, '$1');
-
-            
-            // Greek letters
-            const greekLetters = {
-                '\\alpha': 'α', '\\beta': 'β', '\\gamma': 'γ', '\\delta': 'δ',
-                '\\epsilon': 'ε', '\\zeta': 'ζ', '\\eta': 'η', '\\theta': 'θ',
-                '\\iota': 'ι', '\\kappa': 'κ', '\\lambda': 'λ', '\\mu': 'μ',
-                '\\nu': 'ν', '\\xi': 'ξ', '\\pi': 'π', '\\rho': 'ρ',
-                '\\sigma': 'σ', '\\tau': 'τ', '\\upsilon': 'υ', '\\phi': 'φ',
-                '\\chi': 'χ', '\\psi': 'ψ', '\\omega': 'ω',
-                '\\Alpha': 'Α', '\\Beta': 'Β', '\\Gamma': 'Γ', '\\Delta': 'Δ',
-                '\\Epsilon': 'Ε', '\\Zeta': 'Ζ', '\\Eta': 'Η', '\\Theta': 'Θ',
-                '\\Iota': 'Ι', '\\Kappa': 'Κ', '\\Lambda': 'Λ', '\\Mu': 'Μ',
-                '\\Nu': 'Ν', '\\Xi': 'Ξ', '\\Pi': 'Π', '\\Rho': 'Ρ',
-                '\\Sigma': 'Σ', '\\Tau': 'Τ', '\\Upsilon': 'Υ', '\\Phi': 'Φ',
-                '\\Chi': 'Χ', '\\Psi': 'Ψ', '\\Omega': 'Ω'
-            };
-            
-            for (const [latex, unicode] of Object.entries(greekLetters)) {
-                result = result.split(latex).join(unicode);
-            }
-            
-            // Common mathematical symbols
-            const symbols = {
-                '\\times': '×', '\\div': '÷', '\\pm': '±', '\\mp': '∓',
-                '\\cdot': '⋅', '\\ast': '∗', '\\star': '⋆', '\\circ': '∘',
-                '\\bullet': '∙', '\\cap': '∩', '\\cup': '∪', '\\uplus': '⊎',
-                '\\sqcap': '⊓', '\\sqcup': '⊔', '\\vee': '∨', '\\wedge': '∧',
-                '\\setminus': '∖', '\\bigtriangleup': '△', '\\bigtriangledown': '▽',
-                '\\triangleleft': '◁', '\\triangleright': '▷', '\\diamond': '◇',
-                '\\Box': '□', '\\triangledown': '▽', '\\leq': '≤', '\\geq': '≥',
-                '\\neq': '≠', '\\approx': '≈', '\\cong': '≅', '\\equiv': '≡',
-                '\\sim': '∼', '\\simeq': '≃', '\\propto': '∝', '\\perp': '⊥',
-                '\\parallel': '∥', '\\mid': '∣', '\\angle': '∠', '\\measuredangle': '∡',
-                '\\sphericalangle': '∢', '\\in': '∈', '\\notin': '∉', '\\ni': '∋',
-                '\\subset': '⊂', '\\supset': '⊃', '\\subseteq': '⊆', '\\supseteq': '⊇',
-                '\\forall': '∀', '\\exists': '∃', '\\nexists': '∄', '\\emptyset': '∅',
-                '\\infty': '∞', '\\nabla': '∇', '\\partial': '∂', '\\prime': '′',
-                '\\degree': '°', '\\hat': '^', '\\bar': '¯', '\\vec': '→',
-                '\\dot': '˙', '\\ddot': '¨', '\\ldots': '…', '\\cdots': '…',
-                '\\vdots': '⋮', '\\ddots': '⋱', '\\implies': '⇒', '\\impliedby': '⇐',
-                '\\iff': '⇔', '\\rightarrow': '→', '\\leftarrow': '←', '\\leftrightarrow': '↔',
-                '\\Rightarrow': '⇒', '\\Leftarrow': '⇐', '\\Leftrightarrow': '⇔',
-                '\\to': '→', '\\mapsto': '↦', '\\hbar': 'ℏ', '\\ell': 'ℓ',
-                '\\Re': 'ℜ', '\\Im': 'ℑ', '\\aleph': 'ℵ', '\\clubsuit': '♣',
-                '\\diamondsuit': '♦', '\\heartsuit': '♥', '\\spadesuit': '♠'
-            };
-            
-            for (const [latex, unicode] of Object.entries(symbols)) {
-                result = result.split(latex).join(unicode);
-            }
-            
-            // Convert fractions: \frac{numerator}{denominator} -> numerator/denominator
-            result = result.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g, '($1)/($2)');
-            
-            // Convert square roots: \sqrt{x} -> √(x)
-            result = result.replace(/\\sqrt\[([^\]]*)\]\{([^{}]+)\}/g, '($2)^(1/[$1])');
-            result = result.replace(/\\sqrt\{([^{}]+)\}/g, '√($1)');
-            
-            // Convert superscripts and subscripts (basic handling)
-            // Handle x^{expression} and x^single
-            result = result.replace(/\^(\{[^}]+\})/g, '^$1');
-            result = result.replace(/\^(\{?\}?)/g, '^');
-            
-            // Convert integrals: \int_{lower}^{upper} -> ∫ from lower to upper
-            result = result.replace(/\\int_\{([^}]+)\}\^\{([^}]+)\}/g, '∫_($1)^($2)');
-            result = result.replace(/\\int\^\{([^}]+)\}/g, '∫^($1)');
-            result = result.replace(/\\int_\{([^}]+)\}/g, '∫_($1)');
-            result = result.replace(/\\int/g, '∫');
-            
-            // Convert summation: \sum_{lower}^{upper} -> ∑ from lower to upper
-            result = result.replace(/\\sum_\{([^}]+)\}\^\{([^}]+)\}/g, '∑_($1)^($2)');
-            result = result.replace(/\\sum\^\{([^}]+)\}/g, '∑^($1)');
-            result = result.replace(/\\sum_\{([^}]+)\}/g, '∑_($1)');
-            result = result.replace(/\\sum/g, '∑');
-            
-            // Convert product: \prod_{lower}^{upper}
-            result = result.replace(/\\prod_\{([^}]+)\}\^\{([^}]+)\}/g, '∏_($1)^($2)');
-            result = result.replace(/\\prod/g, '∏');
-            
-            // Convert limits: \lim_{x \to a}
-            result = result.replace(/\\lim_\{([^}]+)\}/g, 'lim_($1)');
-            result = result.replace(/\\lim/g, 'lim');
-            
-            // Convert log functions
-            result = result.replace(/\\ln/g, 'ln');
-            result = result.replace(/\\log/g, 'log');
-            result = result.replace(/\\exp/g, 'exp');
-            result = result.replace(/\\sin/g, 'sin');
-            result = result.replace(/\\cos/g, 'cos');
-            result = result.replace(/\\tan/g, 'tan');
-            result = result.replace(/\\cot/g, 'cot');
-            result = result.replace(/\\sec/g, 'sec');
-            result = result.replace(/\\csc/g, 'csc');
-            result = result.replace(/\\arcsin/g, 'arcsin');
-            result = result.replace(/\\arccos/g, 'arccos');
-            result = result.replace(/\\arctan/g, 'arctan');
-            
-            // Convert parentheses and brackets
-            result = result.replace(/\\left\(/g, '(');
-            result = result.replace(/\\right\)/g, ')');
-            result = result.replace(/\\left\[/g, '[');
-            result = result.replace(/\\right\]/g, ']');
-            result = result.replace(/\\left\{/g, '{');
-            result = result.replace(/\\right\}/g, '}');
-            result = result.replace(/\\left\|/g, '|');
-            result = result.replace(/\\right\|/g, '|');
-            
-            // Clean up extra braces
-            
-            // Remove backslash followed by space (from \text{\ sequences)
-            result = result.replace(/\\\\\s/g, ' ');
-            result = result.replace(/\\\\/g, '');
-            
-            // Convert common numeric superscripts to Unicode
-            result = result.replace(/\^2/g, '²');
-            result = result.replace(/\^3/g, '³');
-            result = result.replace(/\^1/g, '¹');
-            result = result.replace(/\^0/g, '⁰');
-            result = result.replace(/\{([^{}]+)\}/g, '$1');
-            
-            // Clean up multiple spaces
-            result = result.replace(/\s+/g, ' ').trim();
-            
-            return result;
-        }
-        
-        function convertToWord() {
-            const latexInput = document.getElementById('latexInput').value;
-            if (!latexInput.trim()) {
-                alert('Please enter a LaTeX equation first.');
-                return;
-            }
-            
-            const wordOutput = convertLatexToWord(latexInput);
-            document.getElementById('wordOutput').value = wordOutput;
-        }
-        
-        function clearAll() {
-            document.getElementById('latexInput').value = '';
-            document.getElementById('wordOutput').value = '';
-        }
-        
-        function copyToClipboard() {
-            const outputField = document.getElementById('wordOutput');
-            if (!outputField.value) {
-                alert('No output to copy. Please convert an equation first.');
-                return;
-            }
-            
-            outputField.select();
-            outputField.setSelectionRange(0, 99999);
-            
-            navigator.clipboard.writeText(outputField.value).then(() => {
-                alert('Copied to clipboard! Now paste into Word equation editor (Alt + =).');
-            }).catch(err => {
-                alert('Failed to copy. Please select and copy manually.');
-            });
-        }
-        
-        function useExample(example) {
-            document.getElementById('latexInput').value = example;
-            convertToWord();
-        }
-        
-        // Allow Ctrl+Enter to convert
-        document.getElementById('latexInput').addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                convertToWord();
-            }
-        });
+        function convertLatexToWord(latex){let r=latex;r=r.replace(/\\\[|\\\]/g,'').replace(/\\\(|\\\)/g,'').replace(/\$\$/g,'').replace(/\$/g,'').replace(/\\begin\{.*?\}|\\end\{.*?\}/g,'');r=r.replace(/\\text\{([^{}]*)\}/g,'$1').replace(/\\mathrm\{([^{}]*)\}/g,'$1');r=r.replace(/\\mathbf\{([^{}]*)\}/g,'$1').replace(/\\mathit\{([^{}]*)\}/g,'$1').replace(/\\boldsymbol\{([^{}]*)\}/g,'$1').replace(/\\emph\{([^{}]*)\}/g,'$1').replace(/\\textbf\{([^{}]*)\}/g,'$1').replace(/\\textit\{([^{}]*)\}/g,'$1');const g={'\\alpha':'α','\\beta':'β','\\gamma':'γ','\\delta':'δ','\\epsilon':'ε','\\zeta':'ζ','\\eta':'η','\\theta':'θ','\\iota':'ι','\\kappa':'κ','\\lambda':'λ','\\mu':'μ','\\nu':'ν','\\xi':'ξ','\\pi':'π','\\rho':'ρ','\\sigma':'σ','\\tau':'τ','\\upsilon':'υ','\\phi':'φ','\\chi':'χ','\\psi':'ψ','\\omega':'ω','\\Alpha':'Α','\\Beta':'Β','\\Gamma':'Γ','\\Delta':'Δ','\\Epsilon':'Ε','\\Zeta':'Ζ','\\Eta':'Η','\\Theta':'Θ','\\Iota':'Ι','\\Kappa':'Κ','\\Lambda':'Λ','\\Mu':'Μ','\\Nu':'Ν','\\Xi':'Ξ','\\Pi':'Π','\\Rho':'Ρ','\\Sigma':'Σ','\\Tau':'Τ','\\Upsilon':'Υ','\\Phi':'Φ','\\Chi':'Χ','\\Psi':'Ψ','\\Omega':'Ω'};for(const[l,u]of Object.entries(g))r=r.split(l).join(u);const s={'\\times':'×','\\div':'÷','\\pm':'±','\\mp':'∓','\\cdot':'⋅','\\ast':'∗','\\star':'⋆','\\circ':'∘','\\bullet':'∙','\\cap':'∩','\\cup':'∪','\\uplus':'⊎','\\sqcap':'⊓','\\sqcup':'⊔','\\vee':'∨','\\wedge':'∧','\\setminus':'∖','\\bigtriangleup':'△','\\bigtriangledown':'▽','\\triangleleft':'◁','\\triangleright':'▷','\\diamond':'◇','\\Box':'□','\\triangledown':'▽','\\leq':'≤','\\geq':'≥','\\neq':'≠','\\approx':'≈','\\cong':'≅','\\equiv':'≡','\\sim':'∼','\\simeq':'≃','\\propto':'∝','\\perp':'⊥','\\parallel':'∥','\\mid':'∣','\\angle':'∠','\\measuredangle':'∡','\\sphericalangle':'∢','\\in':'∈','\\notin':'∉','\\ni':'∋','\\subset':'⊂','\\supset':'⊃','\\subseteq':'⊆','\\supseteq':'⊇','\\forall':'∀','\\exists':'∃','\\nexists':'∄','\\emptyset':'∅','\\infty':'∞','\\nabla':'∇','\\partial':'∂','\\prime':'′','\\degree':'°','\\hat':'^','\\bar':'¯','\\vec':'→','\\dot':'˙','\\ddot':'¨','\\ldots':'…','\\cdots':'…','\\vdots':'⋮','\\ddots':'⋱','\\implies':'⇒','\\impliedby':'⇐','\\iff':'⇔','\\rightarrow':'→','\\leftarrow':'←','\\leftrightarrow':'↔','\\Rightarrow':'⇒','\\Leftarrow':'⇐','\\Leftrightarrow':'⇔','\\to':'→','\\mapsto':'↦','\\hbar':'ℏ','\\ell':'ℓ','\\Re':'ℜ','\\Im':'ℑ','\\aleph':'ℵ','\\clubsuit':'♣','\\diamondsuit':'♦','\\heartsuit':'♥','\\spadesuit':'♠'};for(const[l,u]of Object.entries(s))r=r.split(l).join(u);r=r.replace(/\\frac\{([^{}]+)\}\{([^{}]+)\}/g,'($1)/($2)');r=r.replace(/\\sqrt\[([^\]]*)\]\{([^{}]+)\}/g,'($2)^(1/[$1])').replace(/\\sqrt\{([^{}]+)\}/g,'√($1)');r=r.replace(/\^(\{[^}]+\})/g,'^$1').replace(/\^(\{?\}?)/g,'^');r=r.replace(/\\int_\{([^}]+)\}\^\{([^}]+)\}/g,'∫_($1)^($2)').replace(/\\int\^\{([^}]+)\}/g,'∫^($1)').replace(/\\int_\{([^}]+)\}/g,'∫_($1)').replace(/\\int/g,'∫');r=r.replace(/\\sum_\{([^}]+)\}\^\{([^}]+)\}/g,'∑_($1)^($2)').replace(/\\sum\^\{([^}]+)\}/g,'∑^($1)').replace(/\\sum_\{([^}]+)\}/g,'∑_($1)').replace(/\\sum/g,'∑');r=r.replace(/\\prod_\{([^}]+)\}\^\{([^}]+)\}/g,'∏_($1)^($2)').replace(/\\prod/g,'∏');r=r.replace(/\\lim_\{([^}]+)\}/g,'lim_($1)').replace(/\\lim/g,'lim');['ln','log','exp','sin','cos','tan','cot','sec','csc','arcsin','arccos','arctan'].forEach(f=>r=r.replace(new RegExp('\\\\'+f,'g'),f));r=r.replace(/\\left\(/g,'(').replace(/\\right\)/g,')').replace(/\\left\[/g,'[').replace(/\\right\]/g,']').replace(/\\left\{/g,'{').replace(/\\right\}/g,'}').replace(/\\left\|/g,'|').replace(/\\right\|/g,'|');r=r.replace(/\\\\\s/g,' ').replace(/\\\\/g,'');r=r.replace(/\^2/g,'²').replace(/\^3/g,'³').replace(/\^1/g,'¹').replace(/\^0/g,'⁰').replace(/\{([^{}]+)\}/g,'$1');return r.replace(/\s+/g,' ').trim()}
+        function convertToWord(){const v=document.getElementById('latexInput').value;if(!v.trim()){alert('Please enter a LaTeX equation first.');return}document.getElementById('wordOutput').value=convertLatexToWord(v)}
+        function clearAll(){document.getElementById('latexInput').value='';document.getElementById('wordOutput').value=''}
+        function copyToClipboard(){const o=document.getElementById('wordOutput');if(!o.value){alert('No output to copy. Please convert an equation first.');return}o.select();o.setSelectionRange(0,99999);navigator.clipboard.writeText(o.value).then(()=>alert('Copied to clipboard! Now paste into Word equation editor (Alt + =).')).catch(()=>alert('Failed to copy. Please select and copy manually.'))}
+        function useExample(e){document.getElementById('latexInput').value=e;convertToWord()}
+        document.getElementById('latexInput').addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='Enter')convertToWord()});
     </script>
 </body>
 </html>
