@@ -1,18 +1,10 @@
-```
-# Logs and temp files
-*.log
-*.tmp
-*.swp
+# Dependencies
+node_modules/
+
+# Editors
+.vscode/
 
 # Environment
 .env
 .env.local
-.env.
-
-# Editors
-.vscode/
-.idea/
-
-# Original rules preserved
-*.log
-```
+.env.*
