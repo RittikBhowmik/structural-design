@@ -1,157 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Structural Engineering Tools - Rittik Bhowmik</title>
-    <style>
-        :root {
-            --primary: #2c3e50;
-            --secondary: #34495e;
-            --accent: #3498db;
-            --light: #ecf0f1;
-            --dark: #2c3e50;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f6fa;
-            color: var(--dark);
-            line-height: 1.6;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        header {
-            text-align: center;
-            margin-bottom: 3rem;
-            padding-top: 2rem;
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            color: var(--primary);
-            margin-bottom: 0.5rem;
-        }
-        
-        .subtitle {
-            color: #7f8c8d;
-            font-size: 1.1rem;
-        }
-        
-        .tools-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-        
-        .tool-card {
-            background: white;
-            border-radius: 8px;
-            padding: 2rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            transition: transform 0.2s, box-shadow 0.2s;
-            border-top: 4px solid var(--accent);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        
-        .tool-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
-        }
-        
-        .tool-card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--secondary);
-        }
-        
-        .tool-card p {
-            color: #7f8c8d;
-            margin-bottom: 1.5rem;
-            flex-grow: 1;
-        }
-        
-        .btn {
-            display: inline-block;
-            background-color: var(--accent);
-            color: white;
-            padding: 0.8rem 1.5rem;
-            border-radius: 4px;
-            text-decoration: none;
-            font-weight: 600;
-            text-align: center;
-            transition: background-color 0.2s;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-        }
-        
-        .btn:hover {
-            background-color: #2980b9;
-        }
-        
-        footer {
-            text-align: center;
-            margin-top: 4rem;
-            padding: 2rem 0;
-            color: #95a5a6;
-            font-size: 0.9rem;
-            border-top: 1px solid #dfe6e9;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Structural Engineering Tools - Rittik Bhowmik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --vercel-black: #171717;
+      --vercel-white: #FFFFFF;
+      --electric-blue: #0070F3;
+      --vivid-purple: #7928CA;
+      --medium-gray: #4D4D4D;
+      --light-border: #EBEBEB;
+      --soft-background: #FAFAFA;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--vercel-black);
+      background-color: var(--vercel-white);
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    header {
+      padding: 72px 0 48px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 40px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--vercel-black);
+    }
+    .subtitle {
+      color: var(--medium-gray);
+      font-size: 16px;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+      gap: 24px;
+      padding: 24px 0 72px;
+    }
+    .tool-card {
+      background: var(--vercel-white);
+      border: 1px solid var(--light-border);
+      border-radius: 6px;
+      padding: 24px;
+      box-shadow: rgba(0,0,0,0.08) 0px 0px 0px 1px, rgba(0,0,0,0.02) 0px 1px 1px 0px, rgba(0,0,0,0.04) 0px 4px 8px 0px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .tool-card:hover {
+      border-color: var(--off-white);
+      box-shadow: rgba(0,0,0,0.08) 0px 0px 0px 1px, rgba(0,0,0,0.04) 0px 8px 16px -4px;
+    }
+    .tool-card h2 {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      color: var(--vercel-black);
+    }
+    .tool-card p {
+      color: var(--medium-gray);
+      font-size: 14px;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+    .btn {
+      display: inline-block;
+      background-color: var(--vercel-black);
+      color: var(--vercel-white);
+      padding: 12px 24px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 14px;
+      text-align: center;
+      transition: all 0.15s;
+      border: 1px solid var(--vercel-black);
+      cursor: pointer;
+      width: 100%;
+    }
+    .btn:hover {
+      background-color: #000;
+      opacity: 0.9;
+    }
+    .btn.disabled {
+      background-color: var(--light-border);
+      border-color: var(--light-border);
+      color: var(--medium-gray);
+      cursor: not-allowed;
+    }
+    footer {
+      text-align: center;
+      padding: 48px 0;
+      color: var(--medium-gray);
+      font-size: 14px;
+      border-top: 1px solid var(--light-border);
+    }
+    @media (max-width: 768px) {
+      .container { padding: 0 16px; }
+      h1 { font-size: 32px; }
+      .tools-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Structural Engineering Tools</h1>
-            <p class="subtitle">Private Workspace &bull; Rittik Bhowmik</p>
-        </header>
-        
-        <main class="tools-grid">
-            <!-- Rebar Development Tool -->
-            <div class="tool-card">
-                <div>
-                    <h2>Rebar Development Length</h2>
-                    <p>ACI 318 calculation for tension and compression development lengths, splices, and hooks.</p>
-                </div>
-                <a href="tools/rebar-development-length/index.html" class="btn">Open Tool</a>
-            </div>
-            
-            <!-- LaTeX to Word Converter -->
-            <div class="tool-card">
-                <div>
-                    <h2>LaTeX to Word Converter</h2>
-                    <p>Convert LaTeX equations to Microsoft Word compatible format for easy pasting.</p>
-                </div>
-                <a href="tools/latex-to-word/index.html" class="btn">Open Tool</a>
-            </div>
-            
-            <!-- Placeholder for future tools -->
-            <div class="tool-card" style="opacity: 0.6; border-top-color: #95a5a6;">
-                <div>
-                    <h2>More Tools Coming Soon</h2>
-                    <p>This workspace will expand with additional structural design calculators as needed.</p>
-                </div>
-                <button class="btn" style="background-color: #95a5a6; cursor: default;">Locked</button>
-            </div>
-        </main>
-        
-        <footer>
-            <p>&copy; 2024 Rittik Bhowmik. Private Access Only.</p>
-        </footer>
-    </div>
+  <div class="container">
+    <header>
+      <h1>Structural Engineering Tools</h1>
+      <p class="subtitle">Private Workspace &bull; Rittik Bhowmik</p>
+    </header>
+    
+    <main class="tools-grid">
+      <div class="tool-card">
+        <div>
+          <h2>Rebar Development Length</h2>
+          <p>ACI 318 calculation for tension and compression development lengths, splices, and hooks.</p>
+        </div>
+        <a href="tools/rebar-development-length/index.html" class="btn">Open Tool</a>
+      </div>
+      
+      <div class="tool-card">
+        <div>
+          <h2>LaTeX to Word Converter</h2>
+          <p>Convert LaTeX equations to Microsoft Word compatible format for easy pasting.</p>
+        </div>
+        <a href="tools/latex-to-word/index.html" class="btn">Open Tool</a>
+      </div>
+      
+      <div class="tool-card" style="opacity: 0.6;">
+        <div>
+          <h2>More Tools Coming Soon</h2>
+          <p>This workspace will expand with additional structural design calculators as needed.</p>
+        </div>
+        <button class="btn disabled">Locked</button>
+      </div>
+    </main>
+    
+    <footer>
+      <p>&copy; 2024 Rittik Bhowmik. Private Access Only.</p>
+    </footer>
+  </div>
 </body>
 </html>
