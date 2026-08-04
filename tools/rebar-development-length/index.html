@@ -1777,114 +1777,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     document.getElementById('download-pdf-btn').addEventListener('click', function() {
-      const rawLatex = window._latexSource || '';
-      if (!rawLatex) { alert('No calculation results to export!'); return; }
-
-      const pdfBtn = this;
-      const originalText = pdfBtn.innerHTML;
-      pdfBtn.disabled = true;
-      pdfBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Generating...';
-
-      // Create a full-screen overlay for PDF capture
-      const overlay = document.createElement('div');
-      overlay.id = 'pdf-overlay';
-      overlay.style.position = 'fixed';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.width = '100vw';
-      overlay.style.height = '100vh';
-      overlay.style.background = 'white';
-      overlay.style.zIndex = '999999';
-      overlay.style.padding = '40px';
-      overlay.style.boxSizing = 'border-box';
-      overlay.style.overflow = 'auto';
-      overlay.style.fontFamily = "'Inter', sans-serif";
-      
-      const container = document.createElement('div');
-      container.style.maxWidth = '210mm';
-      container.style.margin = '0 auto';
-      container.style.background = 'white';
-      container.style.color = 'black';
-      
-      const header = document.createElement('div');
-      header.style.textAlign = 'center';
-      header.style.marginBottom = '30px';
-      header.style.paddingBottom = '20px';
-      header.style.borderBottom = '3px solid #0a2540';
-      header.innerHTML = `<h1 style="font-size: 22px; margin-bottom: 12px; color: #0a2540;">Rebar Development Length Calculation</h1><p style="font-size: 13px; color: #475569; line-height: 1.6;">Project: ${document.getElementById('proj-name').value}<br>Prepared by: ${document.getElementById('proj-eng').value}<br>Date: ${document.getElementById('proj-date').value}</p>`;
-      container.appendChild(header);
-      
-      const latexContent = document.createElement('div');
-      latexContent.style.background = 'white';
-      latexContent.style.color = 'black';
-      latexContent.style.padding = '20px 0';
-      latexContent.innerHTML = rawLatex;
-      container.appendChild(latexContent);
-      
-      overlay.appendChild(container);
-      document.body.appendChild(overlay);
-      document.body.style.overflow = 'hidden';
-
-      if (window.MathJax && MathJax.typesetPromise) {
-        MathJax.typesetPromise([latexContent]).then(() => {
-          setTimeout(() => {
-            html2canvas(overlay, {
-              scale: 2,
-              useCORS: true,
-              logging: false,
-              backgroundColor: '#ffffff'
-            }).then(canvas => {
-              const imgData = canvas.toDataURL('image/png');
-              const pdf = new jsPDF('p', 'mm', 'a4');
-              
-              const imgWidth = 210 - 40;
-              const pageHeight = 297;
-              const imgHeight = (canvas.height * imgWidth) / canvas.width;
-              
-              let heightLeft = imgHeight;
-              let position = 20;
-              
-              pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
-              heightLeft -= pageHeight;
-              
-              while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 20, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-              }
-              
-              pdf.save('rebar_development_length.pdf');
-              
-              document.body.removeChild(overlay);
-              document.body.style.overflow = '';
-              pdfBtn.disabled = false;
-              pdfBtn.innerHTML = originalText;
-              showToast('PDF Downloaded Successfully');
-            }).catch(err => {
-              console.error("Canvas error:", err);
-              document.body.removeChild(overlay);
-              document.body.style.overflow = '';
-              pdfBtn.disabled = false;
-              pdfBtn.innerHTML = originalText;
-              alert('Error generating PDF: ' + err.message);
-            });
-          }, 800);
-        }).catch(err => {
-          console.error("MathJax error:", err);
-          document.body.removeChild(overlay);
-          document.body.style.overflow = '';
-          pdfBtn.disabled = false;
-          pdfBtn.innerHTML = originalText;
-          alert('Error generating PDF: ' + err.message);
-        });
-      } else {
-        document.body.removeChild(overlay);
-        document.body.style.overflow = '';
-        pdfBtn.disabled = false;
-        pdfBtn.innerHTML = originalText;
-        alert('MathJax not loaded. Cannot generate PDF.');
-      }
+      openPrintModal();
     });
 
     document.getElementById('download-excel-btn').addEventListener('click', exportToExcel);
@@ -1927,6 +1820,160 @@ document.addEventListener('DOMContentLoaded', function() {
     console.error("Initialization Error:", err);
   }
 });
+
+// Print Modal Functions
+function openPrintModal() {
+  const rawLatex = window._latexSource || '';
+  if (!rawLatex) { 
+    alert('No calculation results to export!'); 
+    return; 
+  }
+
+  // Get project info
+  const projectName = document.getElementById('proj-name').value;
+  const projectItem = document.getElementById('proj-item').value;
+  const projectDate = document.getElementById('proj-date').value;
+  const projectEng = document.getElementById('proj-eng').value;
+
+  // Generate preview HTML content
+  const previewHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rebar Development Length Calculation - ${projectName}</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"><\/script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #0f172a;
+      background: #fff;
+      padding: 40px;
+      max-width: 210mm;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 3px solid #0a2540;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      font-size: 24px;
+      color: #0a2540;
+      margin-bottom: 15px;
+    }
+    .header-info {
+      font-size: 13px;
+      color: #475569;
+      line-height: 1.8;
+    }
+    .content {
+      background: white;
+      color: black;
+      padding: 20px 0;
+    }
+    mjx-container { overflow-x: auto; padding: 4px 0; }
+    mjx-container[display="true"] { margin: 10px 0 !important; }
+    @media print {
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      @page { margin: 20mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Rebar Development Length Calculation</h1>
+    <div class="header-info">
+      <strong>Project:</strong> ${projectName}<br>
+      <strong>Item:</strong> ${projectItem}<br>
+      <strong>Prepared by:</strong> ${projectEng}<br>
+      <strong>Date:</strong> ${projectDate}
+    </div>
+  </div>
+  
+  <div class="content">
+    ${rawLatex}
+  </div>
+  
+  <script>
+    window.addEventListener('load', function() {
+      if (window.MathJax && MathJax.typesetPromise) {
+        MathJax.typesetPromise();
+      }
+    });
+  <\/script>
+</body>
+</html>`;
+
+  // Create the modal
+  const overlay = document.createElement('div');
+  overlay.className = 'print-modal-overlay';
+  overlay.id = 'print-modal-overlay';
+  
+  overlay.innerHTML = `
+    <div class="print-modal">
+      <div class="print-modal-header">
+        <h2><i class="fa-solid fa-file-pdf"></i> Print Preview - Rebar Calculation</h2>
+        <button class="print-modal-close" onclick="closePrintModal()">&times;</button>
+      </div>
+      <div class="print-modal-toolbar">
+        <button class="btn-primary" onclick="printFromModal()" style="display: inline-flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-print"></i> Print / Save as PDF
+        </button>
+        <span style="color: var(--muted); font-size: 13px; display: flex; align-items: center;">Press Ctrl+P to print or save as PDF</span>
+      </div>
+      <div class="print-modal-body">
+        <div class="print-preview-content" id="print-preview-content"></div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(overlay);
+  
+  // Show modal
+  setTimeout(() => {
+    overlay.classList.add('active');
+    // Insert the preview content
+    document.getElementById('print-preview-content').innerHTML = previewHTML;
+    // Trigger MathJax typesetting in the preview
+    const iframeDoc = document.getElementById('print-preview-content');
+    if (window.MathJax && MathJax.typesetPromise) {
+      setTimeout(() => {
+        MathJax.typesetPromise([iframeDoc]);
+      }, 100);
+    }
+  }, 10);
+}
+
+function closePrintModal() {
+  const overlay = document.getElementById('print-modal-overlay');
+  if (overlay) {
+    overlay.classList.remove('active');
+    setTimeout(() => {
+      overlay.remove();
+    }, 100);
+  }
+}
+
+function printFromModal() {
+  const previewContent = document.getElementById('print-preview-content');
+  if (!previewContent) return;
+  
+  // Extract the inner HTML and create a new window for printing
+  const printContent = previewContent.innerHTML;
+  const printWindow = window.open('', '_blank');
+  printWindow.document.write(printContent);
+  printWindow.document.close();
+  
+  // Wait for MathJax to render then print
+  setTimeout(() => {
+    printWindow.focus();
+    printWindow.print();
+  }, 500);
+}
 </script>
 
 </body>
