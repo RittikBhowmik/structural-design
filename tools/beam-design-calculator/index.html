@@ -697,8 +697,28 @@
               </div>
             </div>
             
-            <div class="diagram-container">
-              <canvas id="simple-beam-diagram" width="800" height="400"></canvas>
+            <div class="diagrams-section" id="diagramsSection">
+              <h3 style="font-size: 16px; font-weight: 500; margin-bottom: 16px;">Beam Diagrams</h3>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 24px;">
+                <!-- Beam Loading Diagram -->
+                <div class="card" style="padding: 16px;">
+                  <h4 style="font-size: 14px; font-weight: 500; margin-bottom: 12px;">Beam Loading Diagram</h4>
+                  <canvas id="beamCanvas" width="700" height="280" style="width: 100%; height: auto; border: 1px solid var(--light-border); border-radius: 4px; background: var(--soft-background);"></canvas>
+                </div>
+                
+                <!-- Shear Force Diagram -->
+                <div class="card" style="padding: 16px;">
+                  <h4 style="font-size: 14px; font-weight: 500; margin-bottom: 12px;">Shear Force Diagram (V)</h4>
+                  <canvas id="shearCanvas" width="700" height="280" style="width: 100%; height: auto; border: 1px solid var(--light-border); border-radius: 4px; background: var(--soft-background);"></canvas>
+                </div>
+                
+                <!-- Bending Moment Diagram -->
+                <div class="card" style="padding: 16px;">
+                  <h4 style="font-size: 14px; font-weight: 500; margin-bottom: 12px;">Bending Moment Diagram (M)</h4>
+                  <canvas id="momentCanvas" width="700" height="280" style="width: 100%; height: auto; border: 1px solid var(--light-border); border-radius: 4px; background: var(--soft-background);"></canvas>
+                </div>
+              </div>
             </div>
             
             <div class="math-block">
@@ -1283,11 +1303,428 @@
         mathOutput
       };
       
-      // Draw diagram
-      drawSimpleBeamDiagram(beamCategory, L, loadCases);
+      // Draw all diagrams
+      drawBeamDiagram(beamCategory, L, loadCases, leftSupport, rightSupport);
+      drawShearDiagram(beamCategory, L, loadCases, reactions);
+      drawMomentDiagram(beamCategory, L, loadCases, reactions);
       
       // Render MathJax
       MathJax.typesetPromise();
+    }
+    
+    // Get support type string
+    function getSupportType(support) {
+      return support === 'pinned' ? 'pinned' : support === 'fixed' ? 'fixed' : support === 'roller' ? 'roller' : 'free';
+    }
+    
+    // Draw beam loading diagram
+    function drawBeamDiagram(beamCategory, L, loadCases, leftSupport, rightSupport) {
+      const canvas = document.getElementById('beamCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;
+      const H = canvas.height;
+      
+      ctx.clearRect(0, 0, W, H);
+      
+      const margin = 50;
+      const beamLength = W - 2 * margin;
+      const scale = beamLength / L;
+      const beamY = H / 2 - 20;
+      
+      // Draw beam line
+      ctx.strokeStyle = '#171717';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(margin, beamY);
+      ctx.lineTo(margin + beamLength, beamY);
+      ctx.stroke();
+      
+      // Draw left support
+      drawSupport(ctx, margin, beamY, leftSupport, true);
+      
+      // Draw right support
+      drawSupport(ctx, margin + beamLength, beamY, rightSupport, false);
+      
+      // Draw loads
+      loadCases.forEach((load) => {
+        if (load.type === 'point') {
+          const x = margin + load.position * scale;
+          drawPointLoad(ctx, x, beamY, load.magnitude);
+        } else if (load.type === 'moment') {
+          const x = margin + load.position * scale;
+          drawMomentLoad(ctx, x, beamY, load.magnitude);
+        } else if (load.type === 'udl-full') {
+          drawUDL(ctx, margin, margin + beamLength, beamY, load.magnitude);
+        } else if (load.type === 'udl-partial') {
+          const startX = margin + load.udlStart * scale;
+          const endX = margin + load.udlEnd * scale;
+          drawUDL(ctx, startX, endX, beamY, load.magnitude);
+        }
+      });
+      
+      // Draw dimension line
+      ctx.strokeStyle = '#4D4D4D';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.moveTo(margin, beamY + 80);
+      ctx.lineTo(margin + beamLength, beamY + 80);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      ctx.fillStyle = '#4D4D4D';
+      ctx.font = '12px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText(`L = ${L} ft`, W / 2, beamY + 95);
+    }
+    
+    // Draw support symbol
+    function drawSupport(ctx, x, y, supportType, isLeft) {
+      ctx.fillStyle = '#171717';
+      ctx.strokeStyle = '#171717';
+      ctx.lineWidth = 2;
+      
+      if (supportType === 'pinned') {
+        // Triangle pointing up
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 12, y + 20);
+        ctx.lineTo(x + 12, y + 20);
+        ctx.closePath();
+        ctx.fill();
+        // Pin circle
+        ctx.beginPath();
+        ctx.arc(x, y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        // Ground hash marks
+        for (let i = 0; i < 5; i++) {
+          ctx.beginPath();
+          ctx.moveTo(x - 15 + i * 7, y + 20);
+          ctx.lineTo(x - 20 + i * 7, y + 28);
+          ctx.stroke();
+        }
+      } else if (supportType === 'fixed') {
+        // Beam going into wall
+        ctx.fillRect(x - (isLeft ? 25 : 0), y - 15, 25, 30);
+        // Wall hash marks
+        ctx.fillStyle = '#4D4D4D';
+        for (let i = 0; i < 6; i++) {
+          ctx.beginPath();
+          const hx = isLeft ? x - 25 - 3 : x + 25;
+          ctx.moveTo(hx, y - 20 + i * 8);
+          ctx.lineTo(hx + (isLeft ? -10 : 10), y - 15 + i * 8);
+          ctx.stroke();
+        }
+      } else if (supportType === 'roller') {
+        // Triangle pointing up
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - 12, y + 20);
+        ctx.lineTo(x + 12, y + 20);
+        ctx.closePath();
+        ctx.stroke();
+        // Two rollers (circles)
+        ctx.beginPath();
+        ctx.arc(x - 8, y + 26, 6, 0, Math.PI * 2);
+        ctx.arc(x + 8, y + 26, 6, 0, Math.PI * 2);
+        ctx.stroke();
+        // Ground line
+        ctx.beginPath();
+        ctx.moveTo(x - 20, y + 35);
+        ctx.lineTo(x + 20, y + 35);
+        ctx.stroke();
+      }
+      // Free support - nothing to draw
+    }
+    
+    // Draw point load arrow
+    function drawPointLoad(ctx, x, y, magnitude) {
+      const arrowLength = 50;
+      ctx.strokeStyle = '#171717';
+      ctx.lineWidth = 2;
+      
+      // Arrow shaft
+      ctx.beginPath();
+      ctx.moveTo(x, y - arrowLength);
+      ctx.lineTo(x, y - 8);
+      ctx.stroke();
+      
+      // Arrowhead
+      ctx.beginPath();
+      ctx.moveTo(x - 8, y - 25);
+      ctx.lineTo(x, y - 8);
+      ctx.lineTo(x + 8, y - 25);
+      ctx.stroke();
+      
+      // Label
+      ctx.fillStyle = '#171717';
+      ctx.font = '13px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${magnitude} k`, x, y - arrowLength - 8);
+    }
+    
+    // Draw moment load
+    function drawMomentLoad(ctx, x, y, magnitude) {
+      const radius = 25;
+      ctx.strokeStyle = '#171717';
+      ctx.lineWidth = 2;
+      
+      // Circular arrow (counter-clockwise for positive moment)
+      ctx.beginPath();
+      ctx.arc(x, y - 15, radius, 0.8 * Math.PI, 2.2 * Math.PI, false);
+      ctx.stroke();
+      
+      // Arrowhead
+      ctx.beginPath();
+      const arrowX = x + radius * Math.cos(2.2 * Math.PI);
+      const arrowY = y - 15 + radius * Math.sin(2.2 * Math.PI);
+      ctx.moveTo(arrowX, arrowY);
+      ctx.lineTo(arrowX - 8, arrowY - 8);
+      ctx.lineTo(arrowX + 4, arrowY - 4);
+      ctx.stroke();
+      
+      // Label
+      ctx.fillStyle = '#171717';
+      ctx.font = '13px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${magnitude} k-ft`, x, y - 55);
+    }
+    
+    // Draw UDL
+    function drawUDL(ctx, startX, endX, y, magnitude) {
+      const arrowSpacing = 25;
+      const arrowLength = 35;
+      
+      // Top line
+      ctx.strokeStyle = '#171717';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(startX, y - arrowLength - 5);
+      ctx.lineTo(endX, y - arrowLength - 5);
+      ctx.stroke();
+      
+      // Individual arrows
+      for (let px = startX; px <= endX; px += arrowSpacing) {
+        ctx.beginPath();
+        ctx.moveTo(px, y - arrowLength);
+        ctx.lineTo(px, y - 8);
+        ctx.stroke();
+        
+        // Arrowhead
+        ctx.beginPath();
+        ctx.moveTo(px - 5, y - 22);
+        ctx.lineTo(px, y - 8);
+        ctx.lineTo(px + 5, y - 22);
+        ctx.stroke();
+      }
+      
+      // Label
+      ctx.fillStyle = '#171717';
+      ctx.font = '13px Inter';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${magnitude} k/ft`, (startX + endX) / 2, y - arrowLength - 18);
+    }
+    
+    // Draw shear force diagram
+    function drawShearDiagram(beamCategory, L, loadCases, reactions) {
+      const canvas = document.getElementById('shearCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;
+      const H = canvas.height;
+      
+      ctx.clearRect(0, 0, W, H);
+      
+      const margin = 50;
+      const beamLength = W - 2 * margin;
+      const scale = beamLength / L;
+      const zeroY = H / 2;
+      
+      // Calculate shear values along beam
+      const numPoints = 200;
+      const shearValues = [];
+      let maxShear = 0;
+      
+      for (let i = 0; i <= numPoints; i++) {
+        const x = (i / numPoints) * L;
+        const V = calculateShearAt(beamCategory, L, loadCases, reactions, x);
+        shearValues.push(V);
+        if (Math.abs(V) > Math.abs(maxShear)) maxShear = V;
+      }
+      
+      // Draw zero line
+      ctx.strokeStyle = '#4D4D4D';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.moveTo(margin, zeroY);
+      ctx.lineTo(margin + beamLength, zeroY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Draw shear diagram
+      ctx.strokeStyle = '#171717';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(margin, zeroY);
+      
+      for (let i = 0; i <= numPoints; i++) {
+        const x = margin + (i / numPoints) * beamLength;
+        const y = zeroY - (shearValues[i] / (Math.abs(maxShear) || 1)) * (H / 2 - 30);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      
+      // Fill area
+      ctx.fillStyle = 'rgba(23, 23, 23, 0.1)';
+      ctx.beginPath();
+      ctx.moveTo(margin, zeroY);
+      for (let i = 0; i <= numPoints; i++) {
+        const x = margin + (i / numPoints) * beamLength;
+        const y = zeroY - (shearValues[i] / (Math.abs(maxShear) || 1)) * (H / 2 - 30);
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(margin + beamLength, zeroY);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Labels
+      ctx.fillStyle = '#171717';
+      ctx.font = '12px Inter';
+      ctx.textAlign = 'left';
+      ctx.fillText('V (kips)', margin, 25);
+      ctx.fillText(`+${maxShear.toFixed(2)}`, margin - 45, zeroY - 10);
+      ctx.fillText(`-${Math.abs(maxShear).toFixed(2)}`, margin - 45, zeroY + 15);
+    }
+    
+    // Calculate shear at position x
+    function calculateShearAt(beamCategory, L, loadCases, reactions, x) {
+      let V = reactions.leftReaction || 0;
+      
+      // Subtract point loads before x
+      loadCases.forEach(load => {
+        if (load.type === 'point' && load.position < x) {
+          V -= load.magnitude;
+        } else if (load.type === 'udl-full') {
+          const udlEnd = Math.min(x, L);
+          V -= load.magnitude * (udlEnd - 0);
+        } else if (load.type === 'udl-partial' && load.udlStart < x) {
+          const udlEnd = Math.min(x, load.udlEnd);
+          if (udlEnd > load.udlStart) {
+            V -= load.magnitude * (udlEnd - load.udlStart);
+          }
+        }
+      });
+      
+      return V;
+    }
+    
+    // Draw bending moment diagram
+    function drawMomentDiagram(beamCategory, L, loadCases, reactions) {
+      const canvas = document.getElementById('momentCanvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;
+      const H = canvas.height;
+      
+      ctx.clearRect(0, 0, W, H);
+      
+      const margin = 50;
+      const beamLength = W - 2 * margin;
+      const scale = beamLength / L;
+      const zeroY = H / 2;
+      
+      // Calculate moment values along beam
+      const numPoints = 200;
+      const momentValues = [];
+      let maxMoment = 0;
+      
+      for (let i = 0; i <= numPoints; i++) {
+        const x = (i / numPoints) * L;
+        const M = calculateMomentAt(beamCategory, L, loadCases, reactions, x);
+        momentValues.push(M);
+        if (Math.abs(M) > Math.abs(maxMoment)) maxMoment = M;
+      }
+      
+      // Draw zero line
+      ctx.strokeStyle = '#4D4D4D';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5, 3]);
+      ctx.beginPath();
+      ctx.moveTo(margin, zeroY);
+      ctx.lineTo(margin + beamLength, zeroY);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      
+      // Draw moment diagram (positive moments plotted upward)
+      ctx.strokeStyle = '#171717';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(margin, zeroY);
+      
+      for (let i = 0; i <= numPoints; i++) {
+        const x = margin + (i / numPoints) * beamLength;
+        const y = zeroY - (momentValues[i] / (Math.abs(maxMoment) || 1)) * (H / 2 - 30);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+      
+      // Fill area
+      ctx.fillStyle = 'rgba(23, 23, 23, 0.1)';
+      ctx.beginPath();
+      ctx.moveTo(margin, zeroY);
+      for (let i = 0; i <= numPoints; i++) {
+        const x = margin + (i / numPoints) * beamLength;
+        const y = zeroY - (momentValues[i] / (Math.abs(maxMoment) || 1)) * (H / 2 - 30);
+        ctx.lineTo(x, y);
+      }
+      ctx.lineTo(margin + beamLength, zeroY);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Labels
+      ctx.fillStyle = '#171717';
+      ctx.font = '12px Inter';
+      ctx.textAlign = 'left';
+      ctx.fillText('M (k-ft)', margin, 25);
+      ctx.fillText(`+${maxMoment.toFixed(2)}`, margin - 50, zeroY - 10);
+      ctx.fillText(`-${Math.abs(maxMoment).toFixed(2)}`, margin - 50, zeroY + 15);
+    }
+    
+    // Calculate moment at position x
+    function calculateMomentAt(beamCategory, L, loadCases, reactions, x) {
+      let M = (reactions.leftReaction || 0) * x;
+      
+      // Subtract moments from loads before x
+      loadCases.forEach(load => {
+        if (load.type === 'point' && load.position < x) {
+          M -= load.magnitude * (x - load.position);
+        } else if (load.type === 'moment' && load.position < x) {
+          M -= load.magnitude;
+        } else if (load.type === 'udl-full') {
+          const udlEnd = Math.min(x, L);
+          const udlLoad = load.magnitude * udlEnd;
+          M -= udlLoad * (udlEnd / 2);
+        } else if (load.type === 'udl-partial' && load.udlStart < x) {
+          const udlEnd = Math.min(x, load.udlEnd);
+          if (udlEnd > load.udlStart) {
+            const segmentLen = udlEnd - load.udlStart;
+            const udlLoad = load.magnitude * segmentLen;
+            const centroid = load.udlStart + segmentLen / 2;
+            M -= udlLoad * (x - centroid);
+          }
+        }
+      });
+      
+      // Add fixed end moments if applicable
+      if (reactions.leftMoment) {
+        M += reactions.leftMoment;
+      }
+      
+      return M;
     }
 
     // Continuous beam calculation
@@ -1667,9 +2104,30 @@
     
     function exportLaTeX() {
       const r = calculationResults;
+      
+      // Get diagram images as base64
+      const beamCanvas = document.getElementById('beamCanvas');
+      const shearCanvas = document.getElementById('shearCanvas');
+      const momentCanvas = document.getElementById('momentCanvas');
+      
+      let beamImageData = '';
+      let shearImageData = '';
+      let momentImageData = '';
+      
+      if (beamCanvas) {
+        beamImageData = beamCanvas.toDataURL('image/png');
+      }
+      if (shearCanvas) {
+        shearImageData = shearCanvas.toDataURL('image/png');
+      }
+      if (momentCanvas) {
+        momentImageData = momentCanvas.toDataURL('image/png');
+      }
+      
       let latex = `\\documentclass{article}
 \\usepackage{amsmath}
 \\usepackage{geometry}
+\\usepackage{graphicx}
 \\geometry{margin=1in}
 \\title{Beam Design Calculation Report}
 \\author{Structural Design Calculator}
@@ -1697,8 +2155,17 @@
         r.loadCases.forEach((load, idx) => {
           latex += `\\subsection*{Load Case ${idx + 1}}
 Load Type: ${load.type.toUpperCase()}\\\\
-Magnitude: ${load.magnitude} ${load.type === 'udl' ? 'k/ft' : load.type === 'moment' ? 'k-ft' : 'kips'}\\\\
+Magnitude: ${load.magnitude} ${load.type === 'udl-full' || load.type === 'udl-partial' ? 'k/ft' : load.type === 'moment' ? 'k-ft' : 'kips'}\\\\
 `;
+          if (load.type === 'point' || load.type === 'moment') {
+            latex += `Position: ${load.position} ft from left support\\\\
+`;
+          }
+          if (load.type === 'udl-partial') {
+            latex += `Start Position: ${load.udlStart} ft\\\\
+End Position: ${load.udlEnd} ft\\\\
+`;
+          }
         });
       } else {
         latex += `\\begin{itemize}
@@ -1717,6 +2184,26 @@ Load Magnitude: ${r.loadMag} ${r.loadType.includes('point') ? 'kips' : 'k/ft'}
       }
       
       latex += `
+\\section*{Beam Diagrams}
+
+\\begin{figure}[h]
+\\centering
+\\includegraphics[width=0.9\\textwidth]{beam-loading.png}
+\\caption{Beam Loading Diagram}
+\\end{figure}
+
+\\begin{figure}[h]
+\\centering
+\\includegraphics[width=0.9\\textwidth]{shear-diagram.png}
+\\caption{Shear Force Diagram}
+\\end{figure}
+
+\\begin{figure}[h]
+\\centering
+\\includegraphics[width=0.9\\textwidth]{moment-diagram.png}
+\\caption{Bending Moment Diagram}
+\\end{figure}
+
 \\section*{Results}
 \\begin{itemize}
 `;
@@ -1756,7 +2243,8 @@ Per AISC 360 ASD Method:
 \\end{document}
 `;
       
-      // Download as .tex file
+      // Create a zip-like structure with images (simplified - just create main tex file with image references)
+      // For full implementation, would need JSZip library
       const blob = new Blob([latex], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -1764,10 +2252,71 @@ Per AISC 360 ASD Method:
       a.download = `beam-calculation-${new Date().toISOString().split('T')[0]}.tex`;
       a.click();
       URL.revokeObjectURL(url);
+      
+      // Also download images separately
+      if (beamImageData) {
+        const imgBlob = dataURItoBlob(beamImageData);
+        const imgUrl = URL.createObjectURL(imgBlob);
+        const imgA = document.createElement('a');
+        imgA.href = imgUrl;
+        imgA.download = `beam-loading-${new Date().toISOString().split('T')[0]}.png`;
+        imgA.click();
+        URL.revokeObjectURL(imgUrl);
+      }
+      if (shearImageData) {
+        const imgBlob = dataURItoBlob(shearImageData);
+        const imgUrl = URL.createObjectURL(imgBlob);
+        const imgA = document.createElement('a');
+        imgA.href = imgUrl;
+        imgA.download = `shear-diagram-${new Date().toISOString().split('T')[0]}.png`;
+        imgA.click();
+        URL.revokeObjectURL(imgUrl);
+      }
+      if (momentImageData) {
+        const imgBlob = dataURItoBlob(momentImageData);
+        const imgUrl = URL.createObjectURL(imgBlob);
+        const imgA = document.createElement('a');
+        imgA.href = imgUrl;
+        imgA.download = `moment-diagram-${new Date().toISOString().split('T')[0]}.png`;
+        imgA.click();
+        URL.revokeObjectURL(imgUrl);
+      }
+    }
+    
+    // Helper function to convert data URI to blob
+    function dataURItoBlob(dataURI) {
+      const byteString = atob(dataURI.split(',')[1]);
+      const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([ab], { type: mimeString });
     }
     
     function exportWord() {
       const r = calculationResults;
+      
+      // Get diagram images as base64
+      const beamCanvas = document.getElementById('beamCanvas');
+      const shearCanvas = document.getElementById('shearCanvas');
+      const momentCanvas = document.getElementById('momentCanvas');
+      
+      let beamImageData = '';
+      let shearImageData = '';
+      let momentImageData = '';
+      
+      if (beamCanvas) {
+        beamImageData = beamCanvas.toDataURL('image/png');
+      }
+      if (shearCanvas) {
+        shearImageData = shearCanvas.toDataURL('image/png');
+      }
+      if (momentCanvas) {
+        momentImageData = momentCanvas.toDataURL('image/png');
+      }
+      
       let html = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -1782,6 +2331,8 @@ Per AISC 360 ASD Method:
     td, th { border: 1px solid #000; padding: 8px; text-align: left; }
     .result { font-weight: bold; }
     .equation { font-family: 'Cambria Math', serif; margin: 15px 0; }
+    img { max-width: 100%; margin: 20px 0; border: 1px solid #ccc; }
+    .diagram-caption { font-size: 12px; font-style: italic; color: #666; margin-top: -15px; margin-bottom: 20px; }
   </style>
 </head>
 <body>
@@ -1814,6 +2365,31 @@ Per AISC 360 ASD Method:
       html += `
   </table>
   
+  <h2>Beam Diagrams</h2>
+`;
+      
+      if (beamImageData) {
+        html += `<h3>Beam Loading Diagram</h3>
+  <img src="${beamImageData}" alt="Beam Loading Diagram" />
+  <p class="diagram-caption">Figure 1: Beam Loading and Support Conditions</p>
+`;
+      }
+      
+      if (shearImageData) {
+        html += `<h3>Shear Force Diagram</h3>
+  <img src="${shearImageData}" alt="Shear Force Diagram" />
+  <p class="diagram-caption">Figure 2: Shear Force Diagram (V)</p>
+`;
+      }
+      
+      if (momentImageData) {
+        html += `<h3>Bending Moment Diagram</h3>
+  <img src="${momentImageData}" alt="Bending Moment Diagram" />
+  <p class="diagram-caption">Figure 3: Bending Moment Diagram (M)</p>
+`;
+      }
+      
+      html += `
   <h2>Results Summary</h2>
   <table>
 `;
@@ -1887,6 +2463,11 @@ Per AISC 360 ASD Method:
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       const r = calculationResults;
+      
+      // Get diagram images
+      const beamCanvas = document.getElementById('beamCanvas');
+      const shearCanvas = document.getElementById('shearCanvas');
+      const momentCanvas = document.getElementById('momentCanvas');
       
       let y = 20;
       
@@ -1967,6 +2548,54 @@ Per AISC 360 ASD Method:
         doc.text('AISC Coefficient Method:', 20, y); y += 6;
         doc.text('M = C*w*L^2 (uniform loads)', 20, y); y += 6;
         doc.text('M = C*P*L (concentrated loads)', 20, y); y += 6;
+      }
+      
+      // Add diagrams to PDF
+      y += 10;
+      doc.setFontSize(14);
+      doc.text('Beam Diagrams', 20, y);
+      y += 8;
+      
+      // Add beam diagram
+      if (beamCanvas) {
+        try {
+          const beamImgData = beamCanvas.toDataURL('image/png');
+          doc.setFontSize(10);
+          doc.text('Beam Loading Diagram:', 20, y);
+          y += 6;
+          doc.addImage(beamImgData, 'PNG', 20, y, 170, 60);
+          y += 65;
+        } catch (e) {
+          console.log('Error adding beam diagram:', e);
+        }
+      }
+      
+      // Add shear diagram
+      if (shearCanvas) {
+        try {
+          const shearImgData = shearCanvas.toDataURL('image/png');
+          doc.setFontSize(10);
+          doc.text('Shear Force Diagram:', 20, y);
+          y += 6;
+          doc.addImage(shearImgData, 'PNG', 20, y, 170, 60);
+          y += 65;
+        } catch (e) {
+          console.log('Error adding shear diagram:', e);
+        }
+      }
+      
+      // Add moment diagram
+      if (momentCanvas) {
+        try {
+          const momentImgData = momentCanvas.toDataURL('image/png');
+          doc.setFontSize(10);
+          doc.text('Bending Moment Diagram:', 20, y);
+          y += 6;
+          doc.addImage(momentImgData, 'PNG', 20, y, 170, 60);
+          y += 65;
+        } catch (e) {
+          console.log('Error adding moment diagram:', e);
+        }
       }
       
       y += 10;
