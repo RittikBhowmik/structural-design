@@ -44,3 +44,6 @@ target/
 .gradle/
 .mypy_cache/
 .pytest_cache/
+
+# Except beam calculator dist (needed for Cloudflare Pages)
+!tools/Beam Design Calculator/dist/
