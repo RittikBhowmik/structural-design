@@ -1,5 +1,5 @@
-# Redirect for Beam Design Calculator subdirectory
-/tools/beam-calculator/* /tools/beam-calculator/dist/index.html 200
+# Beam Calculator - must come before the catch-all rule
+/tools/beam-calculator/*    /tools/beam-calculator/dist/index.html   200
 
-# VitePress routes
-/* /.vitepress/dist/index.html 200
+# VitePress - catch-all for main site
+/*    /.vitepress/dist/index.html   200
