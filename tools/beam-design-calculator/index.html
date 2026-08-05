@@ -1014,29 +1014,70 @@
       const I = parseFloat(document.getElementById('moment-inertia').value);
       const d = parseFloat(document.getElementById('section-depth').value);
       
-      // Determine beam type from supports
+      // Determine beam category from supports
+      let beamCategory = 'simply-supported';
       const beamType = `${leftSupport}-${rightSupport}`;
       
-      // Collect load cases
+      // Classify support combinations
+      if (leftSupport === 'fixed' && rightSupport === 'free') {
+        beamCategory = 'cantilever';
+      } else if (leftSupport === 'fixed' && rightSupport === 'pinned') {
+        beamCategory = 'propped-cantilever';
+      } else if (leftSupport === 'fixed' && rightSupport === 'roller') {
+        beamCategory = 'propped-cantilever';
+      } else if (leftSupport === 'pinned' && rightSupport === 'fixed') {
+        beamCategory = 'propped-cantilever';
+      } else if (leftSupport === 'roller' && rightSupport === 'fixed') {
+        beamCategory = 'propped-cantilever';
+      } else if (leftSupport === 'fixed' && rightSupport === 'fixed') {
+        beamCategory = 'fixed-fixed';
+      } else if (leftSupport === 'pinned' && rightSupport === 'pinned') {
+        beamCategory = 'simply-supported';
+      } else if (leftSupport === 'pinned' && rightSupport === 'roller') {
+        beamCategory = 'simply-supported';
+      } else if (leftSupport === 'roller' && rightSupport === 'pinned') {
+        beamCategory = 'simply-supported';
+      } else if (leftSupport === 'roller' && rightSupport === 'roller') {
+        beamCategory = 'simply-supported';
+      }
+      
+      console.log(`Support combination: ${beamType}, Category: ${beamCategory}`);
+      
+      // Collect load cases with all properties
       const loadCases = [];
       document.querySelectorAll('.load-case').forEach(lc => {
-        loadCases.push({
-          type: lc.querySelector('.load-type').value,
-          magnitude: parseFloat(lc.querySelector('.load-magnitude').value),
-          position: parseFloat(lc.querySelector('.load-position').value)
-        });
+        const loadType = lc.querySelector('.load-type').value;
+        const loadCase = {
+          type: loadType,
+          magnitude: parseFloat(lc.querySelector('.load-magnitude').value) || 0,
+          position: parseFloat(lc.querySelector('.load-position').value) || 0,
+          udlStart: 0,
+          udlEnd: L
+        };
+        
+        // Handle partial UDL positions
+        if (loadType === 'udl-partial') {
+          const udlStartInput = lc.querySelector('.udl-start');
+          const udlEndInput = lc.querySelector('.udl-end');
+          if (udlStartInput) loadCase.udlStart = parseFloat(udlStartInput.value) || 0;
+          if (udlEndInput) loadCase.udlEnd = parseFloat(udlEndInput.value) || L;
+        }
+        
+        loadCases.push(loadCase);
       });
+      
+      console.log(`Load cases collected: ${loadCases.length}`);
       
       let maxMoment = 0;
       let maxShear = 0;
       let maxDeflection = 0;
       let mathOutput = '';
       
-      // Calculate based on beam type and loads
+      // Calculate based on beam category and loads
       loadCases.forEach((load, idx) => {
         let M = 0, V = 0, delta = 0;
         
-        if (beamType === 'simply-supported') {
+        if (beamCategory === 'simply-supported') {
           if (load.type === 'point') {
             const a = load.position;
             const b = L - a;
@@ -1045,10 +1086,23 @@
             delta = (load.magnitude * a * b * (L + b) * Math.sqrt(3 * (L + b))) / (27 * E * I * L);
             
             mathOutput += `<div style="margin-bottom: 16px;">
-              <strong>Load Case ${idx + 1}: Point Load P = ${load.magnitude} kips at x = ${a} ft</strong><br>
+              <strong>Load Case ${idx + 1}: Point Load P = ${load.magnitude} kips at x = ${a.toFixed(1)} ft</strong><br>
               $$M_{max} = \\frac{Pab}{L} = \\frac{${load.magnitude} \\times ${a.toFixed(1)} \\times ${b.toFixed(1)}}{${L}} = ${M.toFixed(2)} \\text{ k-ft}$$<br>
               $$V_{max} = \\frac{Pb}{L} = \\frac{${load.magnitude} \\times ${b.toFixed(1)}}{${L}} = ${V.toFixed(2)} \\text{ kips}$$<br>
               $$\\Delta_{max} = \\frac{Pab(L+b)\\sqrt{3(L+b)}}{27EIL}$$
+            </div>`;
+          } else if (load.type === 'moment') {
+            const a = load.position;
+            const b = L - a;
+            M = (load.magnitude * a) / L;
+            V = load.magnitude / L;
+            delta = (load.magnitude * a * (L - a) * (2 * L - a)) / (9 * Math.sqrt(3) * E * I * L);
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Concentrated Moment M = ${load.magnitude} kip-ft at x = ${a.toFixed(1)} ft</strong><br>
+              $$M_{max} = \\frac{Ma}{L} = \\frac{${load.magnitude} \\times ${a.toFixed(1)}}{${L}} = ${M.toFixed(2)} \\text{ k-ft}$$<br>
+              $$V_{max} = \\frac{M}{L} = \\frac{${load.magnitude}}{${L}} = ${V.toFixed(2)} \\text{ kips}$$<br>
+              $$\\Delta_{max} = \\frac{Ma(L-a)(2L-a)}{9\\sqrt{3}EIL}$$
             </div>`;
           } else if (load.type === 'udl') {
             const w = load.magnitude;
@@ -1057,13 +1111,31 @@
             delta = (5 * w * Math.pow(L, 4)) / (384 * E * I);
             
             mathOutput += `<div style="margin-bottom: 16px;">
-              <strong>Load Case ${idx + 1}: Uniform Load w = ${w} k/ft</strong><br>
+              <strong>Load Case ${idx + 1}: Uniform Load w = ${w} k/ft (full span)</strong><br>
               $$M_{max} = \\frac{wL^2}{8} = \\frac{${w} \\times ${L}^2}{8} = ${M.toFixed(2)} \\text{ k-ft}$$<br>
               $$V_{max} = \\frac{wL}{2} = \\frac{${w} \\times ${L}}{2} = ${V.toFixed(2)} \\text{ kips}$$<br>
               $$\\Delta_{max} = \\frac{5wL^4}{384EI}$$
             </div>`;
+          } else if (load.type === 'udl-partial') {
+            const w = load.magnitude;
+            const a = load.udlStart;
+            const b = load.udlEnd;
+            const c = b - a;
+            const totalLoad = w * c;
+            const centroidPos = a + c / 2;
+            const R2 = (totalLoad * centroidPos) / L;
+            const R1 = totalLoad - R2;
+            V = Math.max(R1, R2);
+            M = R1 * centroidPos - (w * c * c) / 8;
+            delta = (totalLoad * Math.pow(L, 3)) / (48 * E * I);
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Partial Uniform Load w = ${w} k/ft from x = ${a.toFixed(1)} ft to x = ${b.toFixed(1)} ft</strong><br>
+              $$R_1 = \\frac{wc(L - \\bar{x})}{L}, \\quad R_2 = \\frac{wc\\bar{x}}{L}$$<br>
+              $$M_{max} \\approx ${M.toFixed(2)} \\text{ k-ft}, \\quad V_{max} \\approx ${V.toFixed(2)} \\text{ kips}$$
+            </div>`;
           }
-        } else if (beamType === 'cantilever') {
+        } else if (beamCategory === 'cantilever') {
           if (load.type === 'point') {
             const a = load.position;
             M = load.magnitude * a;
@@ -1071,10 +1143,21 @@
             delta = (load.magnitude * Math.pow(a, 3)) / (3 * E * I);
             
             mathOutput += `<div style="margin-bottom: 16px;">
-              <strong>Load Case ${idx + 1}: Point Load P = ${load.magnitude} kips at x = ${a} ft</strong><br>
+              <strong>Load Case ${idx + 1}: Point Load P = ${load.magnitude} kips at x = ${a.toFixed(1)} ft</strong><br>
               $$M_{max} = P \\times a = ${load.magnitude} \\times ${a.toFixed(1)} = ${M.toFixed(2)} \\text{ k-ft}$$<br>
               $$V_{max} = P = ${V} \\text{ kips}$$<br>
               $$\\Delta_{max} = \\frac{Pa^3}{3EI}$$
+            </div>`;
+          } else if (load.type === 'moment') {
+            M = load.magnitude;
+            V = 0;
+            delta = (load.magnitude * Math.pow(L, 2)) / (2 * E * I);
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Concentrated Moment M = ${load.magnitude} kip-ft</strong><br>
+              $$M_{max} = M = ${M.toFixed(2)} \\text{ k-ft}$$<br>
+              $$V_{max} = 0$$<br>
+              $$\\Delta_{max} = \\frac{ML^2}{2EI}$$
             </div>`;
           } else if (load.type === 'udl') {
             const w = load.magnitude;
@@ -1083,10 +1166,81 @@
             delta = (w * Math.pow(L, 4)) / (8 * E * I);
             
             mathOutput += `<div style="margin-bottom: 16px;">
-              <strong>Load Case ${idx + 1}: Uniform Load w = ${w} k/ft</strong><br>
+              <strong>Load Case ${idx + 1}: Uniform Load w = ${w} k/ft (full span)</strong><br>
               $$M_{max} = \\frac{wL^2}{2} = \\frac{${w} \\times ${L}^2}{2} = ${M.toFixed(2)} \\text{ k-ft}$$<br>
               $$V_{max} = wL = ${V.toFixed(2)} \\text{ kips}$$<br>
               $$\\Delta_{max} = \\frac{wL^4}{8EI}$$
+            </div>`;
+          } else if (load.type === 'udl-partial') {
+            const w = load.magnitude;
+            const a = load.udlStart;
+            const b = load.udlEnd;
+            const c = b - a;
+            M = (w * c * c) / 2 + w * c * a;
+            V = w * c;
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Partial Uniform Load w = ${w} k/ft from x = ${a.toFixed(1)} ft to x = ${b.toFixed(1)} ft</strong><br>
+              $$M_{max} = \\frac{wc^2}{2} + wca = ${M.toFixed(2)} \\text{ k-ft}$$<br>
+              $$V_{max} = wc = ${V.toFixed(2)} \\text{ kips}$$
+            </div>`;
+          }
+        } else if (beamCategory === 'fixed-fixed') {
+          if (load.type === 'point') {
+            const a = load.position;
+            const b = L - a;
+            M = (load.magnitude * a * b * b) / (L * L);
+            V = (load.magnitude * b * b * (3 * a + b)) / Math.pow(L, 3);
+            delta = (load.magnitude * Math.pow(a, 2) * Math.pow(b, 2)) / (3 * E * I * L);
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Point Load P = ${load.magnitude} kips at x = ${a.toFixed(1)} ft</strong><br>
+              $$M_{fixed} = \\frac{Pab^2}{L^2} = \\frac{${load.magnitude} \\times ${a.toFixed(1)} \\times ${b.toFixed(1)}^2}{${L}^2} = ${M.toFixed(2)} \\text{ k-ft}$$<br>
+              $$M_{center} = \\frac{2Pa^2b^2}{L^3}$$<br>
+              $$V_{max} = \\frac{Pb^2(3a+b)}{L^3} = ${V.toFixed(2)} \\text{ kips}$$
+            </div>`;
+          } else if (load.type === 'udl') {
+            const w = load.magnitude;
+            M = (w * L * L) / 12;
+            V = (w * L) / 2;
+            delta = (w * Math.pow(L, 4)) / (384 * E * I);
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Uniform Load w = ${w} k/ft (full span)</strong><br>
+              $$M_{fixed} = \\frac{wL^2}{12} = \\frac{${w} \\times ${L}^2}{12} = ${M.toFixed(2)} \\text{ k-ft}$$<br>
+              $$M_{center} = \\frac{wL^2}{24}$$<br>
+              $$V_{max} = \\frac{wL}{2} = ${V.toFixed(2)} \\text{ kips}$$
+            </div>`;
+          }
+        } else if (beamCategory === 'propped-cantilever') {
+          if (load.type === 'point') {
+            const a = load.position;
+            const b = L - a;
+            const R_fixed = (load.magnitude * b * b * (3 * L - b)) / Math.pow(L, 3);
+            const R_prop = load.magnitude - R_fixed;
+            M = R_prop * L - load.magnitude * b;
+            V = Math.max(R_fixed, R_prop);
+            delta = (load.magnitude * Math.pow(b, 3) * (3 * L - b)) / (6 * E * I * L);
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Point Load P = ${load.magnitude} kips at x = ${a.toFixed(1)} ft</strong><br>
+              $$R_{prop} = \\frac{Pb^2(3L-b)}{L^3} = ${R_prop.toFixed(2)} \\text{ kips}$$<br>
+              $$R_{fixed} = P - R_{prop} = ${R_fixed.toFixed(2)} \\text{ kips}$$<br>
+              $$M_{fixed} = R_{prop}L - Pb = ${M.toFixed(2)} \\text{ k-ft}$$
+            </div>`;
+          } else if (load.type === 'udl') {
+            const w = load.magnitude;
+            const R_prop = (3 * w * L) / 8;
+            const R_fixed = (5 * w * L) / 8;
+            M = (w * L * L) / 8;
+            V = R_fixed;
+            delta = (w * Math.pow(L, 4)) / (185 * E * I);
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Uniform Load w = ${w} k/ft (full span)</strong><br>
+              $$R_{prop} = \\frac{3wL}{8} = ${R_prop.toFixed(2)} \\text{ kips}$$<br>
+              $$R_{fixed} = \\frac{5wL}{8} = ${R_fixed.toFixed(2)} \\text{ kips}$$<br>
+              $$M_{fixed} = \\frac{wL^2}{8} = ${M.toFixed(2)} \\text{ k-ft}$$
             </div>`;
           }
         }
@@ -1097,12 +1251,11 @@
       });
       
       // Convert units
-      maxMoment *= 12; // k-ft to k-in
+      maxMoment *= 12;
       const bendingStress = (maxMoment * (d / 2)) / I;
       const allowableStress = 0.66 * Fy;
       const utilization = bendingStress / allowableStress;
-      
-      maxDeflection *= 1728; // ft³ to in³
+      maxDeflection *= 1728;
       
       // Display results
       document.getElementById('max-moment').innerHTML = `${(maxMoment/12).toFixed(2)}<span class="result-unit">k-ft</span>`;
@@ -1111,7 +1264,6 @@
       document.getElementById('bending-stress').innerHTML = `${bendingStress.toFixed(2)}<span class="result-unit">ksi</span>`;
       document.getElementById('allowable-stress').innerHTML = `${allowableStress.toFixed(2)}<span class="result-unit">ksi</span>`;
       document.getElementById('utilization').innerHTML = `${utilization.toFixed(3)}`;
-      
       document.getElementById('simple-math-output').innerHTML = mathOutput;
       document.getElementById('simple-results').style.display = 'block';
       
@@ -1119,6 +1271,7 @@
       calculationResults = {
         type: 'simple',
         beamType,
+        beamCategory,
         L, E, Fy, I, d,
         maxMoment: maxMoment / 12,
         maxShear,
@@ -1131,12 +1284,12 @@
       };
       
       // Draw diagram
-      drawSimpleBeamDiagram(beamType, L, loadCases);
+      drawSimpleBeamDiagram(beamCategory, L, loadCases);
       
       // Render MathJax
       MathJax.typesetPromise();
     }
-    
+
     // Continuous beam calculation
     function calculateContinuousBeam() {
       const numSpans = parseInt(document.getElementById('num-spans').value);
