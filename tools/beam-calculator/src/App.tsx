@@ -12,12 +12,14 @@ export default function App() {
       {/* header */}
       <header className="sticky top-0 z-50 border-b border-neutral-200 bg-white/90 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-3">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="#171717">
-              <path d="M12 2L2 22h20L12 2zm0 3.5L18.5 20H5.5L12 5.5z" />
-            </svg>
-            <span className="text-[15px] font-medium">Structural Design</span>
-          </div>
+          <a href="../../../index.html" className="flex items-center gap-3 text-neutral-900 no-underline">
+            <div className="flex h-8 w-8 items-center justify-center rounded bg-[#0070F3]">
+              <svg width="18" height="18" viewBox="0 0 512 512" fill="white" aria-hidden="true">
+                <path d="M.2 468.9C2.7 493.1 23.1 512 48 512l96 0 320 0c26.5 0 48-21.5 48-48l0-96c0-26.5-21.5-48-48-48l-48 0 0 80c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-80-64 0 0 80c0 8.8-7.2 16-16 16s-16-7.2-16-16l0-80-80 0c-8.8 0-16-7.2-16-16s7.2-16 16-16l80 0 0-64-80 0c-8.8 0-16-7.2-16-16s7.2-16 16-16l80 0 0-64-80 0c-8.8 0-16-7.2-16-16s7.2-16 16-16l80 0 0-48c0-26.5-21.5-48-48-48L48 0C21.5 0 0 21.5 0 48L0 368l0 96c0 1.7 .1 3.3 .2 4.9z" />
+              </svg>
+            </div>
+            <span className="text-[15px] font-medium">Beam Calculator</span>
+          </a>
           <span className="hidden text-xs text-neutral-400 sm:block">
             AISC Beam Diagrams &amp; Formulas · ASD
           </span>

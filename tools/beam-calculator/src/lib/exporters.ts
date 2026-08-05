@@ -212,7 +212,7 @@ export function exportWord(r: ExportReport) {
       (s) => `
   <h3>${esc(s.title)}</h3>
   ${s.note ? `<p class="note">${esc(s.note)}</p>` : ''}
-  ${s.latex.map((l) => `<p class="equation">${esc(latexToPlain(l))}</p>`).join('\n')}`,
+  ${s.latex.map((l) => `<p class="equation">${esc(l)}</p>`).join('\n')}`,
     )
     .join('\n');
 
@@ -401,7 +401,7 @@ export function exportPdf(r: ExportReport) {
     textLine(s.title, { bold: true, size: 10.5 });
     if (s.note) textLine(s.note, { gray: true, size: 8.5, indent: 12 });
     y += 2;
-    for (const l of s.latex) textLine(latexToPlain(l), { indent: 18 });
+    for (const l of s.latex) textLine(l, { indent: 18 });
     y += 8;
   }
 
