@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beam Design Calculator - Structural Design</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23171717'%3E%3Cpath d='M12 2L2 22h20L12 2zm0 3.5L18.5 20H5.5L12 5.5z'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.0/es5/tex-mml-chtml.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --black: #171717;
+      --white: #FFFFFF;
+      --off-black: #000000;
+      --charcoal: #171717;
+      --medium-gray: #4D4D4D;
+      --light-border: #EBEBEB;
+      --soft-background: #FAFAFA;
+      --off-white: #EDEDED;
+      --disabled: #E8E8E8;
+    }
+    
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      color: var(--black);
+      background-color: var(--white);
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 32px;
+    }
+    
+    /* Navigation */
+    .nav-header {
+      background: var(--white);
+      border-bottom: 1px solid var(--light-border);
+      height: 64px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--black);
+    }
+    
+    .nav-logo {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .nav-title {
+      font-size: 16px;
+      font-weight: 500;
+    }
+    
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    
+    .nav-link {
+      color: var(--black);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 400;
+      padding: 8px;
+      transition: color 0.15s;
+    }
+    
+    .nav-link:hover {
+      color: var(--off-black);
+      background: rgba(23, 23, 23, 0.05);
+    }
+    
+    .nav-link.active {
+      color: var(--black);
+      font-weight: 500;
+      border-bottom: 2px solid var(--black);
+      padding-bottom: 4px;
+    }
+    
+    /* Main Content */
+    main {
+      padding: 48px 0 72px;
+    }
+    
+    h1 {
+      font-size: 40px;
+      font-weight: 500;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
+    }
+    
+    .subtitle {
+      color: var(--medium-gray);
+      font-size: 16px;
+      margin-bottom: 32px;
+    }
+    
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 32px;
+      border-bottom: 1px solid var(--light-border);
+    }
+    
+    .tab {
+      padding: 12px 24px;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--black);
+      font-size: 14px;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .tab:hover {
+      background: rgba(23, 23, 23, 0.05);
+    }
+    
+    .tab.active {
+      color: var(--black);
+      font-weight: 500;
+      border-bottom-color: var(--black);
+    }
+    
+    /* Cards */
+    .card {
+      background: var(--white);
+      border: 1px solid var(--light-border);
+      border-radius: 6px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    }
+    
+    .card-title {
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    
+    /* Form Grid */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--black);
+    }
+    
+    input, select {
+      background: var(--white);
+      border: 1px solid var(--light-border);
+      border-radius: 4px;
+      padding: 12px 16px;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--black);
+      font-family: 'Inter', sans-serif;
+      transition: all 0.15s;
+    }
+    
+    input:focus, select:focus {
+      outline: none;
+      border-color: var(--black);
+      box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.1);
+    }
+    
+    input::placeholder {
+      color: var(--medium-gray);
+    }
+    
+    .input-hint {
+      font-size: 13px;
+      color: var(--medium-gray);
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid transparent;
+    }
+    
+    .btn-primary {
+      background: var(--black);
+      color: var(--white);
+      border-color: var(--black);
+    }
+    
+    .btn-primary:hover {
+      background: var(--off-black);
+    }
+    
+    .btn-secondary {
+      background: var(--white);
+      color: var(--black);
+      border: 1px solid var(--light-border);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--soft-background);
+      border-color: #D0D0D0;
+    }
+    
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    
+    /* Results Section */
+    .results-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-top: 24px;
+    }
+    
+    .result-item {
+      background: var(--soft-background);
+      border: 1px solid var(--light-border);
+      border-radius: 4px;
+      padding: 16px;
+    }
+    
+    .result-label {
+      font-size: 13px;
+      color: var(--medium-gray);
+      margin-bottom: 4px;
+    }
+    
+    .result-value {
+      font-size: 20px;
+      font-weight: 500;
+      color: var(--black);
+      font-family: 'JetBrains Mono', monospace;
+    }
+    
+    .result-unit {
+      font-size: 14px;
+      color: var(--medium-gray);
+      margin-left: 4px;
+    }
+    
+    /* Diagram Canvas */
+    .diagram-container {
+      background: var(--white);
+      border: 1px solid var(--light-border);
+      border-radius: 6px;
+      padding: 24px;
+      margin-top: 24px;
+      overflow-x: auto;
+    }
+    
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+    
+    /* Math Display */
+    .math-block {
+      background: var(--soft-background);
+      border: 1px solid var(--light-border);
+      border-radius: 4px;
+      padding: 20px;
+      margin: 16px 0;
+      overflow-x: auto;
+    }
+    
+    .math-inline {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--soft-background);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 13px;
+    }
+    
+    /* Export Panel */
+    .export-panel {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .export-panel.active {
+      display: flex;
+    }
+    
+    .export-modal {
+      background: var(--white);
+      border-radius: 6px;
+      padding: 32px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .export-modal h3 {
+      font-size: 20px;
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+    
+    .export-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    
+    .export-option {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      border: 1px solid var(--light-border);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .export-option:hover {
+      background: var(--soft-background);
+      border-color: var(--black);
+    }
+    
+    .export-option.selected {
+      border-color: var(--black);
+      background: var(--soft-background);
+    }
+    
+    .export-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+    }
+    
+    /* Load Case Manager */
+    .load-case {
+      background: var(--soft-background);
+      border: 1px solid var(--light-border);
+      border-radius: 4px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .load-case-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .load-case-title {
+      font-size: 14px;
+      font-weight: 500;
+    }
+    
+    .btn-icon {
+      background: transparent;
+      border: none;
+      color: var(--medium-gray);
+      cursor: pointer;
+      padding: 4px;
+      font-size: 14px;
+    }
+    
+    .btn-icon:hover {
+      color: var(--black);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container { padding: 0 16px; }
+      h1 { font-size: 32px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+    
+    /* Hidden sections */
+    .section {
+      display: none;
+    }
+    
+    .section.active {
+      display: block;
+    }
+    
+    /* Continuous beam specific */
+    .span-inputs {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+    
+    .span-input {
+      width: 100px;
+    }
+    
+    /* Status badge */
+    .badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 500;
+      background: var(--black);
+      color: var(--white);
+    }
+    
+    .badge-neutral {
+      background: var(--off-white);
+      color: var(--black);
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="nav-header">
+    <div class="nav-container">
+      <a href="../../index.html" class="nav-brand">
+        <svg class="nav-logo" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2L2 22h20L12 2zm0 3.5L18.5 20H5.5L12 5.5z"/>
+        </svg>
+        <span class="nav-title">Structural Design</span>
+      </a>
+      <div class="nav-links">
+        <a href="../../index.html" class="nav-link">Home</a>
+        <a href="../rebar-development-length/index.html" class="nav-link">Rebar Calc</a>
+        <a href="../latex-to-word/index.html" class="nav-link">LaTeX to Word</a>
+      </div>
+    </div>
+  </nav>
+  
+  <div class="container">
+    <main>
+      <h1>Beam Design Calculator</h1>
+      <p class="subtitle">AISC-based beam analysis and design with continuous beam support</p>
+      
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" data-tab="simple-beam">Simple Beam</button>
+        <button class="tab" data-tab="continuous-beam">Continuous Beam</button>
+      </div>
+      
+      <!-- Simple Beam Section -->
+      <div id="simple-beam" class="section active">
+        <div class="card">
+          <h2 class="card-title">Beam Configuration</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="beam-type">Beam Type</label>
+              <select id="beam-type">
+                <option value="simply-supported">Simply Supported</option>
+                <option value="cantilever">Cantilever</option>
+                <option value="fixed-fixed">Fixed-Fixed</option>
+                <option value="propped-cantilever">Propped Cantilever</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="beam-length">Beam Length (ft)</label>
+              <input type="number" id="beam-length" value="20" step="0.1" min="1">
+            </div>
+            <div class="form-group">
+              <label for="modulus-E">Modulus of Elasticity, E (ksi)</label>
+              <input type="number" id="modulus-E" value="29000" step="100">
+              <span class="input-hint">Default: 29,000 ksi for steel</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2 class="card-title">Material & Section Properties</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="yield-strength">Yield Strength, Fy (ksi)</label>
+              <input type="number" id="yield-strength" value="50" step="1">
+              <span class="input-hint">Default: 50 ksi for A992 steel</span>
+            </div>
+            <div class="form-group">
+              <label for="moment-inertia">Moment of Inertia, I (in⁴)</label>
+              <input type="number" id="moment-inertia" value="500" step="1">
+              <span class="input-hint">Enter moment of inertia about strong axis</span>
+            </div>
+            <div class="form-group">
+              <label for="section-depth">Section Depth, d (in)</label>
+              <input type="number" id="section-depth" value="16" step="0.1">
+              <span class="input-hint">For stress calculations</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2 class="card-title">Load Cases</h2>
+          <div id="load-cases-container">
+            <div class="load-case">
+              <div class="load-case-header">
+                <span class="load-case-title">Load Case 1</span>
+                <button class="btn-icon" onclick="removeLoadCase(this)"><i class="fa-solid fa-trash"></i></button>
+              </div>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Load Type</label>
+                  <select class="load-type">
+                    <option value="point">Point Load</option>
+                    <option value="udl">Uniformly Distributed Load</option>
+                    <option value="moment">Concentrated Moment</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Magnitude (kips or k-ft)</label>
+                  <input type="number" class="load-magnitude" value="10" step="0.1">
+                </div>
+                <div class="form-group">
+                  <label>Position from Left (ft)</label>
+                  <input type="number" class="load-position" value="10" step="0.1" min="0">
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="btn btn-secondary" onclick="addLoadCase()" style="margin-top: 12px;">
+            <i class="fa-solid fa-plus"></i> Add Load Case
+          </button>
+        </div>
+        
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="calculateSimpleBeam()">
+            <i class="fa-solid fa-calculator"></i> Calculate
+          </button>
+          <button class="btn btn-secondary" onclick="showExportPanel('simple')">
+            <i class="fa-solid fa-file-export"></i> Export Results
+          </button>
+        </div>
+        
+        <div id="simple-results" style="display: none;">
+          <div class="card" style="margin-top: 24px;">
+            <h2 class="card-title">Results</h2>
+            <div class="results-grid">
+              <div class="result-item">
+                <div class="result-label">Maximum Moment</div>
+                <div class="result-value" id="max-moment">--<span class="result-unit">k-ft</span></div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">Maximum Shear</div>
+                <div class="result-value" id="max-shear">--<span class="result-unit">kips</span></div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">Maximum Deflection</div>
+                <div class="result-value" id="max-deflection">--<span class="result-unit">in</span></div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">Bending Stress</div>
+                <div class="result-value" id="bending-stress">--<span class="result-unit">ksi</span></div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">Allowable Stress (0.66Fy)</div>
+                <div class="result-value" id="allowable-stress">--<span class="result-unit">ksi</span></div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">Utilization Ratio</div>
+                <div class="result-value" id="utilization">--</div>
+              </div>
+            </div>
+            
+            <div class="diagram-container">
+              <canvas id="simple-beam-diagram" width="800" height="400"></canvas>
+            </div>
+            
+            <div class="math-block">
+              <h3 style="font-size: 16px; margin-bottom: 12px;">Calculation Summary</h3>
+              <div id="simple-math-output"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Continuous Beam Section -->
+      <div id="continuous-beam" class="section">
+        <div class="card">
+          <h2 class="card-title">Continuous Beam Configuration</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="num-spans">Number of Spans</label>
+              <select id="num-spans" onchange="updateSpanInputs()">
+                <option value="2">2 Spans</option>
+                <option value="3" selected>3 Spans</option>
+                <option value="4">4 Spans</option>
+                <option value="5">5 Spans</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cont-modulus-E">Modulus of Elasticity, E (ksi)</label>
+              <input type="number" id="cont-modulus-E" value="29000" step="100">
+            </div>
+            <div class="form-group">
+              <label for="cont-moment-inertia">Moment of Inertia, I (in⁴)</label>
+              <input type="number" id="cont-moment-inertia" value="500" step="1">
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-top: 20px;">
+            <label>Span Lengths (ft)</label>
+            <div class="span-inputs" id="span-inputs">
+              <!-- Generated by JS -->
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2 class="card-title">Material Properties</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="cont-yield-strength">Yield Strength, Fy (ksi)</label>
+              <input type="number" id="cont-yield-strength" value="50" step="1">
+            </div>
+            <div class="form-group">
+              <label for="cont-section-depth">Section Depth, d (in)</label>
+              <input type="number" id="cont-section-depth" value="16" step="0.1">
+            </div>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h2 class="card-title">Loading (AISC Table-Based)</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="cont-load-type">Load Pattern</label>
+              <select id="cont-load-type">
+                <option value="uniform-all">Uniform Load on All Spans</option>
+                <option value="uniform-alternate">Uniform Load on Alternate Spans</option>
+                <option value="point-center">Point Load at Center of Each Span</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cont-load-magnitude">Load Magnitude</label>
+              <input type="number" id="cont-load-magnitude" value="2" step="0.1">
+              <span class="input-hint">k/ft for uniform, kips for point</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="calculateContinuousBeam()">
+            <i class="fa-solid fa-calculator"></i> Calculate
+          </button>
+          <button class="btn btn-secondary" onclick="showExportPanel('continuous')">
+            <i class="fa-solid fa-file-export"></i> Export Results
+          </button>
+        </div>
+        
+        <div id="continuous-results" style="display: none;">
+          <div class="card" style="margin-top: 24px;">
+            <h2 class="card-title">Results (AISC Coefficients)</h2>
+            <div class="results-grid">
+              <div class="result-item">
+                <div class="result-label">Max Positive Moment</div>
+                <div class="result-value" id="cont-max-pos-moment">--<span class="result-unit">k-ft</span></div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">Max Negative Moment</div>
+                <div class="result-value" id="cont-max-neg-moment">--<span class="result-unit">k-ft</span></div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">Max Shear</div>
+                <div class="result-value" id="cont-max-shear">--<span class="result-unit">kips</span></div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">Max Deflection</div>
+                <div class="result-value" id="cont-max-deflection">--<span class="result-unit">in</span></div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">Bending Stress</div>
+                <div class="result-value" id="cont-bending-stress">--<span class="result-unit">ksi</span></div>
+              </div>
+              <div class="result-item">
+                <div class="result-label">Utilization Ratio</div>
+                <div class="result-value" id="cont-utilization">--</div>
+              </div>
+            </div>
+            
+            <div class="diagram-container">
+              <canvas id="continuous-beam-diagram" width="800" height="400"></canvas>
+            </div>
+            
+            <div class="math-block">
+              <h3 style="font-size: 16px; margin-bottom: 12px;">AISC Coefficient Method</h3>
+              <div id="continuous-math-output"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Export Panel -->
+  <div id="export-panel" class="export-panel">
+    <div class="export-modal">
+      <h3>Export Calculation Report</h3>
+      <div class="export-options">
+        <div class="export-option" onclick="selectExportOption(this, 'latex')">
+          <i class="fa-solid fa-file-code" style="font-size: 24px;"></i>
+          <div>
+            <div style="font-weight: 500;">LaTeX Document</div>
+            <div style="font-size: 13px; color: var(--medium-gray);">Complete equations and calculations in LaTeX format</div>
+          </div>
+        </div>
+        <div class="export-option" onclick="selectExportOption(this, 'word')">
+          <i class="fa-solid fa-file-word" style="font-size: 24px;"></i>
+          <div>
+            <div style="font-weight: 500;">MS Word Document</div>
+            <div style="font-size: 13px; color: var(--medium-gray);">Editable Word document with equations</div>
+          </div>
+        </div>
+        <div class="export-option" onclick="selectExportOption(this, 'pdf')">
+          <i class="fa-solid fa-file-pdf" style="font-size: 24px;"></i>
+          <div>
+            <div style="font-weight: 500;">PDF Document</div>
+            <div style="font-size: 13px; color: var(--medium-gray);">Print-ready PDF with diagrams and calculations</div>
+          </div>
+        </div>
+      </div>
+      <div class="export-actions">
+        <button class="btn btn-secondary" onclick="closeExportPanel()">Cancel</button>
+        <button class="btn btn-primary" onclick="exportDocument()">Export</button>
+      </div>
+    </div>
+  </div>
+  
+  <script>
+    // Global state
+    let currentExportType = null;
+    let currentBeamType = 'simple';
+    let calculationResults = null;
+    
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab).classList.add('active');
+      });
+    });
+    
+    // Update span inputs for continuous beam
+    function updateSpanInputs() {
+      const numSpans = parseInt(document.getElementById('num-spans').value);
+      const container = document.getElementById('span-inputs');
+      container.innerHTML = '';
+      
+      for (let i = 0; i < numSpans; i++) {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'span-input';
+        input.value = 20;
+        input.step = 0.1;
+        input.min = 1;
+        input.placeholder = `Span ${i+1}`;
+        input.id = `span-${i}`;
+        container.appendChild(input);
+      }
+    }
+    
+    // Initialize span inputs
+    updateSpanInputs();
+    
+    // Add load case
+    function addLoadCase() {
+      const container = document.getElementById('load-cases-container');
+      const count = container.querySelectorAll('.load-case').length + 1;
+      
+      const loadCase = document.createElement('div');
+      loadCase.className = 'load-case';
+      loadCase.innerHTML = `
+        <div class="load-case-header">
+          <span class="load-case-title">Load Case ${count}</span>
+          <button class="btn-icon" onclick="removeLoadCase(this)"><i class="fa-solid fa-trash"></i></button>
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Load Type</label>
+            <select class="load-type">
+              <option value="point">Point Load</option>
+              <option value="udl">Uniformly Distributed Load</option>
+              <option value="moment">Concentrated Moment</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Magnitude (kips or k-ft)</label>
+            <input type="number" class="load-magnitude" value="10" step="0.1">
+          </div>
+          <div class="form-group">
+            <label>Position from Left (ft)</label>
+            <input type="number" class="load-position" value="10" step="0.1" min="0">
+          </div>
+        </div>
+      `;
+      container.appendChild(loadCase);
+    }
+    
+    // Remove load case
+    function removeLoadCase(btn) {
+      const container = document.getElementById('load-cases-container');
+      if (container.querySelectorAll('.load-case').length > 1) {
+        btn.closest('.load-case').remove();
+      }
+    }
+    
+    // Simple beam calculation
+    function calculateSimpleBeam() {
+      const L = parseFloat(document.getElementById('beam-length').value);
+      const E = parseFloat(document.getElementById('modulus-E').value);
+      const Fy = parseFloat(document.getElementById('yield-strength').value);
+      const I = parseFloat(document.getElementById('moment-inertia').value);
+      const d = parseFloat(document.getElementById('section-depth').value);
+      const beamType = document.getElementById('beam-type').value;
+      
+      // Collect load cases
+      const loadCases = [];
+      document.querySelectorAll('.load-case').forEach(lc => {
+        loadCases.push({
+          type: lc.querySelector('.load-type').value,
+          magnitude: parseFloat(lc.querySelector('.load-magnitude').value),
+          position: parseFloat(lc.querySelector('.load-position').value)
+        });
+      });
+      
+      let maxMoment = 0;
+      let maxShear = 0;
+      let maxDeflection = 0;
+      let mathOutput = '';
+      
+      // Calculate based on beam type and loads
+      loadCases.forEach((load, idx) => {
+        let M = 0, V = 0, delta = 0;
+        
+        if (beamType === 'simply-supported') {
+          if (load.type === 'point') {
+            const a = load.position;
+            const b = L - a;
+            M = (load.magnitude * a * b) / L;
+            V = (load.magnitude * b) / L;
+            delta = (load.magnitude * a * b * (L + b) * Math.sqrt(3 * (L + b))) / (27 * E * I * L);
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Point Load P = ${load.magnitude} kips at x = ${a} ft</strong><br>
+              $$M_{max} = \\frac{Pab}{L} = \\frac{${load.magnitude} \\times ${a.toFixed(1)} \\times ${b.toFixed(1)}}{${L}} = ${M.toFixed(2)} \\text{ k-ft}$$<br>
+              $$V_{max} = \\frac{Pb}{L} = \\frac{${load.magnitude} \\times ${b.toFixed(1)}}{${L}} = ${V.toFixed(2)} \\text{ kips}$$<br>
+              $$\\Delta_{max} = \\frac{Pab(L+b)\\sqrt{3(L+b)}}{27EIL}$$
+            </div>`;
+          } else if (load.type === 'udl') {
+            const w = load.magnitude;
+            M = (w * L * L) / 8;
+            V = (w * L) / 2;
+            delta = (5 * w * Math.pow(L, 4)) / (384 * E * I);
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Uniform Load w = ${w} k/ft</strong><br>
+              $$M_{max} = \\frac{wL^2}{8} = \\frac{${w} \\times ${L}^2}{8} = ${M.toFixed(2)} \\text{ k-ft}$$<br>
+              $$V_{max} = \\frac{wL}{2} = \\frac{${w} \\times ${L}}{2} = ${V.toFixed(2)} \\text{ kips}$$<br>
+              $$\\Delta_{max} = \\frac{5wL^4}{384EI}$$
+            </div>`;
+          }
+        } else if (beamType === 'cantilever') {
+          if (load.type === 'point') {
+            const a = load.position;
+            M = load.magnitude * a;
+            V = load.magnitude;
+            delta = (load.magnitude * Math.pow(a, 3)) / (3 * E * I);
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Point Load P = ${load.magnitude} kips at x = ${a} ft</strong><br>
+              $$M_{max} = P \\times a = ${load.magnitude} \\times ${a.toFixed(1)} = ${M.toFixed(2)} \\text{ k-ft}$$<br>
+              $$V_{max} = P = ${V} \\text{ kips}$$<br>
+              $$\\Delta_{max} = \\frac{Pa^3}{3EI}$$
+            </div>`;
+          } else if (load.type === 'udl') {
+            const w = load.magnitude;
+            M = (w * L * L) / 2;
+            V = w * L;
+            delta = (w * Math.pow(L, 4)) / (8 * E * I);
+            
+            mathOutput += `<div style="margin-bottom: 16px;">
+              <strong>Load Case ${idx + 1}: Uniform Load w = ${w} k/ft</strong><br>
+              $$M_{max} = \\frac{wL^2}{2} = \\frac{${w} \\times ${L}^2}{2} = ${M.toFixed(2)} \\text{ k-ft}$$<br>
+              $$V_{max} = wL = ${V.toFixed(2)} \\text{ kips}$$<br>
+              $$\\Delta_{max} = \\frac{wL^4}{8EI}$$
+            </div>`;
+          }
+        }
+        
+        maxMoment = Math.max(maxMoment, Math.abs(M));
+        maxShear = Math.max(maxShear, Math.abs(V));
+        maxDeflection = Math.max(maxDeflection, Math.abs(delta));
+      });
+      
+      // Convert units
+      maxMoment *= 12; // k-ft to k-in
+      const bendingStress = (maxMoment * (d / 2)) / I;
+      const allowableStress = 0.66 * Fy;
+      const utilization = bendingStress / allowableStress;
+      
+      maxDeflection *= 1728; // ft³ to in³
+      
+      // Display results
+      document.getElementById('max-moment').innerHTML = `${(maxMoment/12).toFixed(2)}<span class="result-unit">k-ft</span>`;
+      document.getElementById('max-shear').innerHTML = `${maxShear.toFixed(2)}<span class="result-unit">kips</span>`;
+      document.getElementById('max-deflection').innerHTML = `${maxDeflection.toFixed(4)}<span class="result-unit">in</span>`;
+      document.getElementById('bending-stress').innerHTML = `${bendingStress.toFixed(2)}<span class="result-unit">ksi</span>`;
+      document.getElementById('allowable-stress').innerHTML = `${allowableStress.toFixed(2)}<span class="result-unit">ksi</span>`;
+      document.getElementById('utilization').innerHTML = `${utilization.toFixed(3)}`;
+      
+      document.getElementById('simple-math-output').innerHTML = mathOutput;
+      document.getElementById('simple-results').style.display = 'block';
+      
+      // Store results for export
+      calculationResults = {
+        type: 'simple',
+        beamType,
+        L, E, Fy, I, d,
+        maxMoment: maxMoment / 12,
+        maxShear,
+        maxDeflection,
+        bendingStress,
+        allowableStress,
+        utilization,
+        loadCases,
+        mathOutput
+      };
+      
+      // Draw diagram
+      drawSimpleBeamDiagram(beamType, L, loadCases);
+      
+      // Render MathJax
+      MathJax.typesetPromise();
+    }
+    
+    // Continuous beam calculation
+    function calculateContinuousBeam() {
+      const numSpans = parseInt(document.getElementById('num-spans').value);
+      const spans = [];
+      for (let i = 0; i < numSpans; i++) {
+        spans.push(parseFloat(document.getElementById(`span-${i}`).value));
+      }
+      const E = parseFloat(document.getElementById('cont-modulus-E').value);
+      const I = parseFloat(document.getElementById('cont-moment-inertia').value);
+      const Fy = parseFloat(document.getElementById('cont-yield-strength').value);
+      const d = parseFloat(document.getElementById('cont-section-depth').value);
+      const loadType = document.getElementById('cont-load-type').value;
+      const loadMag = parseFloat(document.getElementById('cont-load-magnitude').value);
+      
+      // Use AISC coefficients for continuous beams
+      // Based on AISC Manual Table 3-23 (Continuous Beams)
+      let posCoeff = 0.08; // Positive moment coefficient
+      let negCoeff = 0.10; // Negative moment coefficient
+      let shearCoeff = 0.60; // Shear coefficient
+      let deflCoeff = 0.0069; // Deflection coefficient
+      
+      if (numSpans === 2) {
+        posCoeff = 0.0703;
+        negCoeff = 0.125;
+        shearCoeff = 0.625;
+      } else if (numSpans === 3) {
+        posCoeff = 0.080;
+        negCoeff = 0.100;
+        shearCoeff = 0.600;
+      } else {
+        posCoeff = 0.077;
+        negCoeff = 0.107;
+        shearCoeff = 0.607;
+      }
+      
+      const avgSpan = spans.reduce((a, b) => a + b, 0) / numSpans;
+      const maxSpan = Math.max(...spans);
+      
+      let maxPosMoment = 0, maxNegMoment = 0, maxShear = 0, maxDeflection = 0;
+      let mathOutput = '';
+      
+      if (loadType === 'uniform-all' || loadType === 'uniform-alternate') {
+        const w = loadMag;
+        maxPosMoment = posCoeff * w * Math.pow(maxSpan, 2);
+        maxNegMoment = negCoeff * w * Math.pow(maxSpan, 2);
+        maxShear = shearCoeff * w * maxSpan;
+        maxDeflection = (deflCoeff * w * Math.pow(maxSpan, 4)) / (E * I);
+        
+        mathOutput = `
+          <div style="margin-bottom: 20px;">
+            <strong>AISC Continuous Beam Coefficients (${numSpans} spans)</strong><br><br>
+            Using AISC Manual coefficients for continuous beams with uniform loading:<br><br>
+            $$M_{pos} = C_1 w L^2 = ${posCoeff.toFixed(4)} \\times ${w} \\times ${maxSpan}^2 = ${maxPosMoment.toFixed(2)} \\text{ k-ft}$$<br>
+            $$M_{neg} = C_2 w L^2 = ${negCoeff.toFixed(4)} \\times ${w} \\times ${maxSpan}^2 = ${maxNegMoment.toFixed(2)} \\text{ k-ft}$$<br>
+            $$V_{max} = C_3 w L = ${shearCoeff.toFixed(4)} \\times ${w} \\times ${maxSpan} = ${maxShear.toFixed(2)} \\text{ kips}$$<br>
+            $$\\Delta_{max} = C_4 \\frac{wL^4}{EI} = ${deflCoeff.toFixed(4)} \\times \\frac{${w} \\times ${maxSpan}^4}{${E} \\times ${I}}$$
+          </div>
+        `;
+      } else if (loadType === 'point-center') {
+        const P = loadMag;
+        posCoeff = 0.175;
+        negCoeff = 0.150;
+        maxPosMoment = posCoeff * P * maxSpan;
+        maxNegMoment = negCoeff * P * maxSpan;
+        maxShear = 0.625 * P;
+        maxDeflection = (0.015 * P * Math.pow(maxSpan, 3)) / (E * I);
+        
+        mathOutput = `
+          <div style="margin-bottom: 20px;">
+            <strong>AISC Continuous Beam Coefficients (${numSpans} spans)</strong><br><br>
+            Using AISC Manual coefficients for continuous beams with concentrated loads:<br><br>
+            $$M_{pos} = C_1 P L = ${posCoeff} \\times ${P} \\times ${maxSpan} = ${maxPosMoment.toFixed(2)} \\text{ k-ft}$$<br>
+            $$M_{neg} = C_2 P L = ${negCoeff} \\times ${P} \\times ${maxSpan} = ${maxNegMoment.toFixed(2)} \\text{ k-ft}$$<br>
+            $$V_{max} = C_3 P = 0.625 \\times ${P} = ${maxShear.toFixed(2)} \\text{ kips}$$
+          </div>
+        `;
+      }
+      
+      // Convert units
+      const maxMomentKipIn = Math.max(maxPosMoment, maxNegMoment) * 12;
+      const bendingStress = (maxMomentKipIn * (d / 2)) / I;
+      const allowableStress = 0.66 * Fy;
+      const utilization = bendingStress / allowableStress;
+      
+      maxDeflection *= 1728;
+      
+      // Display results
+      document.getElementById('cont-max-pos-moment').innerHTML = `${maxPosMoment.toFixed(2)}<span class="result-unit">k-ft</span>`;
+      document.getElementById('cont-max-neg-moment').innerHTML = `${maxNegMoment.toFixed(2)}<span class="result-unit">k-ft</span>`;
+      document.getElementById('cont-max-shear').innerHTML = `${maxShear.toFixed(2)}<span class="result-unit">kips</span>`;
+      document.getElementById('cont-max-deflection').innerHTML = `${Math.abs(maxDeflection).toFixed(4)}<span class="result-unit">in</span>`;
+      document.getElementById('cont-bending-stress').innerHTML = `${bendingStress.toFixed(2)}<span class="result-unit">ksi</span>`;
+      document.getElementById('cont-utilization').innerHTML = `${utilization.toFixed(3)}`;
+      
+      document.getElementById('continuous-math-output').innerHTML = mathOutput;
+      document.getElementById('continuous-results').style.display = 'block';
+      
+      // Store results for export
+      calculationResults = {
+        type: 'continuous',
+        numSpans,
+        spans,
+        E, Fy, I, d,
+        loadType,
+        loadMag,
+        maxPosMoment,
+        maxNegMoment,
+        maxShear,
+        maxDeflection,
+        bendingStress,
+        allowableStress,
+        utilization,
+        mathOutput
+      };
+      
+      // Draw diagram
+      drawContinuousBeamDiagram(numSpans, spans, loadType);
+      
+      // Render MathJax
+      MathJax.typesetPromise();
+    }
+    
+    // Draw simple beam diagram
+    function drawSimpleBeamDiagram(beamType, L, loadCases) {
+      const canvas = document.getElementById('simple-beam-diagram');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;
+      const H = canvas.height;
+      
+      ctx.clearRect(0, 0, W, H);
+      
+      // Set up coordinate system
+      const margin = 60;
+      const beamLength = W - 2 * margin;
+      const scale = beamLength / L;
+      const beamY = H / 2;
+      
+      // Draw beam
+      ctx.strokeStyle = '#171717';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(margin, beamY);
+      ctx.lineTo(margin + beamLength, beamY);
+      ctx.stroke();
+      
+      // Draw supports based on beam type
+      ctx.fillStyle = '#171717';
+      if (beamType === 'simply-supported') {
+        // Triangle at left (pin)
+        ctx.beginPath();
+        ctx.moveTo(margin, beamY);
+        ctx.lineTo(margin - 15, beamY + 25);
+        ctx.lineTo(margin + 15, beamY + 25);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Circle at right (roller)
+        ctx.beginPath();
+        ctx.arc(margin + beamLength, beamY + 12, 10, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (beamType === 'cantilever') {
+        // Fixed support at left
+        ctx.fillRect(margin - 20, beamY - 30, 20, 60);
+        ctx.fillStyle = '#EBEBEB';
+        for (let i = 0; i < 5; i++) {
+          ctx.beginPath();
+          ctx.moveTo(margin - 20, beamY - 25 + i * 12);
+          ctx.lineTo(margin - 35, beamY - 20 + i * 12);
+          ctx.stroke();
+        }
+      }
+      
+      // Draw loads
+      loadCases.forEach((load, idx) => {
+        const x = margin + load.position * scale;
+        
+        if (load.type === 'point') {
+          // Arrow pointing down
+          ctx.strokeStyle = '#171717';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(x, beamY - 60);
+          ctx.lineTo(x, beamY - 10);
+          ctx.stroke();
+          
+          // Arrowhead
+          ctx.beginPath();
+          ctx.moveTo(x - 8, beamY - 25);
+          ctx.lineTo(x, beamY - 10);
+          ctx.lineTo(x + 8, beamY - 25);
+          ctx.stroke();
+          
+          // Label
+          ctx.fillStyle = '#171717';
+          ctx.font = '14px Inter';
+          ctx.fillText(`${load.magnitude} k`, x - 20, beamY - 70);
+        } else if (load.type === 'udl') {
+          // Series of arrows
+          const startX = margin;
+          const endX = margin + beamLength;
+          for (let px = startX; px <= endX; px += 30) {
+            ctx.beginPath();
+            ctx.moveTo(px, beamY - 40);
+            ctx.lineTo(px, beamY - 10);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(px - 5, beamY - 25);
+            ctx.lineTo(px, beamY - 10);
+            ctx.lineTo(px + 5, beamY - 25);
+            ctx.stroke();
+          }
+          
+          // Top line
+          ctx.beginPath();
+          ctx.moveTo(startX, beamY - 40);
+          ctx.lineTo(endX, beamY - 40);
+          ctx.stroke();
+          
+          ctx.fillStyle = '#171717';
+          ctx.fillText(`${load.magnitude} k/ft`, W / 2 - 30, beamY - 50);
+        }
+      });
+      
+      // Draw dimensions
+      ctx.strokeStyle = '#4D4D4D';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(margin, beamY + 50);
+      ctx.lineTo(margin + beamLength, beamY + 50);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(margin, beamY + 40);
+      ctx.lineTo(margin, beamY + 60);
+      ctx.stroke();
+      
+      ctx.beginPath();
+      ctx.moveTo(margin + beamLength, beamY + 40);
+      ctx.lineTo(margin + beamLength, beamY + 60);
+      ctx.stroke();
+      
+      ctx.fillStyle = '#4D4D4D';
+      ctx.font = '14px JetBrains Mono';
+      ctx.fillText(`L = ${L} ft`, W / 2 - 30, beamY + 75);
+    }
+    
+    // Draw continuous beam diagram
+    function drawContinuousBeamDiagram(numSpans, spans, loadType) {
+      const canvas = document.getElementById('continuous-beam-diagram');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width;
+      const H = canvas.height;
+      
+      ctx.clearRect(0, 0, W, H);
+      
+      const margin = 60;
+      const totalLength = W - 2 * margin;
+      const totalSpanLength = spans.reduce((a, b) => a + b, 0);
+      const scale = totalLength / totalSpanLength;
+      const beamY = H / 2;
+      
+      // Draw beam
+      ctx.strokeStyle = '#171717';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(margin, beamY);
+      ctx.lineTo(margin + totalLength, beamY);
+      ctx.stroke();
+      
+      // Draw supports
+      ctx.fillStyle = '#171717';
+      let currentX = margin;
+      spans.forEach((span, idx) => {
+        const supportX = currentX;
+        
+        // Triangle support
+        ctx.beginPath();
+        ctx.moveTo(supportX, beamY);
+        ctx.lineTo(supportX - 15, beamY + 25);
+        ctx.lineTo(supportX + 15, beamY + 25);
+        ctx.closePath();
+        ctx.fill();
+        
+        currentX += span * scale;
+      });
+      
+      // Last support
+      ctx.beginPath();
+      ctx.moveTo(currentX, beamY);
+      ctx.lineTo(currentX - 15, beamY + 25);
+      ctx.lineTo(currentX + 15, beamY + 25);
+      ctx.closePath();
+      ctx.fill();
+      
+      // Draw span labels
+      ctx.fillStyle = '#4D4D4D';
+      ctx.font = '13px JetBrains Mono';
+      currentX = margin;
+      spans.forEach((span, idx) => {
+        const nextX = currentX + span * scale;
+        const labelX = (currentX + nextX) / 2;
+        
+        ctx.fillText(`${span}'`, labelX - 15, beamY + 50);
+        
+        // Dimension line
+        ctx.strokeStyle = '#4D4D4D';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(currentX, beamY + 35);
+        ctx.lineTo(nextX, beamY + 35);
+        ctx.stroke();
+        
+        currentX = nextX;
+      });
+      
+      // Draw load representation
+      if (loadType.includes('uniform')) {
+        spans.forEach((span, idx) => {
+          if (loadType === 'uniform-all' || (loadType === 'uniform-alternate' && idx % 2 === 0)) {
+            const startX = margin + spans.slice(0, idx).reduce((a, b) => a + b, 0) * scale;
+            const endX = startX + span * scale;
+            
+            for (let px = startX; px <= endX; px += 25) {
+              ctx.strokeStyle = '#171717';
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(px, beamY - 35);
+              ctx.lineTo(px, beamY - 10);
+              ctx.stroke();
+              
+              ctx.beginPath();
+              ctx.moveTo(px - 4, beamY - 22);
+              ctx.lineTo(px, beamY - 10);
+              ctx.lineTo(px + 4, beamY - 22);
+              ctx.stroke();
+            }
+          }
+        });
+      }
+    }
+    
+    // Export panel functions
+    function showExportPanel(type) {
+      currentBeamType = type;
+      document.getElementById('export-panel').classList.add('active');
+    }
+    
+    function closeExportPanel() {
+      document.getElementById('export-panel').classList.remove('active');
+    }
+    
+    function selectExportOption(el, type) {
+      document.querySelectorAll('.export-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      currentExportType = type;
+    }
+    
+    function exportDocument() {
+      if (!currentExportType || !calculationResults) {
+        alert('Please select an export option and run calculations first.');
+        return;
+      }
+      
+      if (currentExportType === 'latex') {
+        exportLaTeX();
+      } else if (currentExportType === 'word') {
+        exportWord();
+      } else if (currentExportType === 'pdf') {
+        exportPDF();
+      }
+      
+      closeExportPanel();
+    }
+    
+    function exportLaTeX() {
+      const r = calculationResults;
+      let latex = `\\documentclass{article}
+\\usepackage{amsmath}
+\\usepackage{geometry}
+\\geometry{margin=1in}
+\\title{Beam Design Calculation Report}
+\\author{Structural Design Calculator}
+\\date{\\today}
+
+\\begin{document}
+
+\\maketitle
+
+\\section*{Beam Information}
+`;
+      
+      if (r.type === 'simple') {
+        latex += `\\begin{itemize}
+\\item Beam Type: ${r.beamType.replace('-', ' ').toUpperCase()}
+\\item Span Length: $L = ${r.L}$ ft
+\\item Modulus of Elasticity: $E = ${r.E}$ ksi
+\\item Yield Strength: $F_y = ${r.Fy}$ ksi
+\\item Moment of Inertia: $I = ${r.I}$ in$^4$
+\\item Section Depth: $d = ${r.d}$ in
+\\end{itemize}
+
+\\section*{Load Cases}
+`;
+        r.loadCases.forEach((load, idx) => {
+          latex += `\\subsection*{Load Case ${idx + 1}}
+Load Type: ${load.type.toUpperCase()}\\\\
+Magnitude: ${load.magnitude} ${load.type === 'udl' ? 'k/ft' : load.type === 'moment' ? 'k-ft' : 'kips'}\\\\
+`;
+        });
+      } else {
+        latex += `\\begin{itemize}
+\\item Number of Spans: ${r.numSpans}
+\\item Span Lengths: ${r.spans.map((s, i) => `Span ${i+1}: ${s}$ ft`).join(', ')}
+\\item Modulus of Elasticity: $E = ${r.E}$ ksi
+\\item Yield Strength: $F_y = ${r.Fy}$ ksi
+\\item Moment of Inertia: $I = ${r.I}$ in$^4$
+\\end{itemize}
+
+\\section*{Loading}
+Load Pattern: ${r.loadType.replace('-', ' ').toUpperCase()}\\\\
+Load Magnitude: ${r.loadMag} ${r.loadType.includes('point') ? 'kips' : 'k/ft'}
+
+`;
+      }
+      
+      latex += `
+\\section*{Results}
+\\begin{itemize}
+`;
+      
+      if (r.type === 'simple') {
+        latex += `\\item Maximum Moment: $M_{max} = ${r.maxMoment.toFixed(2)}$ k-ft
+\\item Maximum Shear: $V_{max} = ${r.maxShear.toFixed(2)}$ kips
+\\item Maximum Deflection: $\\Delta_{max} = ${r.maxDeflection.toFixed(4)}$ in
+\\item Bending Stress: $f_b = ${r.bendingStress.toFixed(2)}$ ksi
+\\item Allowable Stress (ASD): $F_b = 0.66F_y = ${r.allowableStress.toFixed(2)}$ ksi
+\\item Utilization Ratio: $UR = ${r.utilization.toFixed(3)}$
+`;
+      } else {
+        latex += `\\item Maximum Positive Moment: $M_{pos} = ${r.maxPosMoment.toFixed(2)}$ k-ft
+\\item Maximum Negative Moment: $M_{neg} = ${r.maxNegMoment.toFixed(2)}$ k-ft
+\\item Maximum Shear: $V_{max} = ${r.maxShear.toFixed(2)}$ kips
+\\item Maximum Deflection: $\\Delta_{max} = ${Math.abs(r.maxDeflection).toFixed(4)}$ in
+\\item Bending Stress: $f_b = ${r.bendingStress.toFixed(2)}$ ksi
+\\item Utilization Ratio: $UR = ${r.utilization.toFixed(3)}$
+`;
+      }
+      
+      latex += `\\end{itemize}
+
+\\section*{Calculations}
+${r.mathOutput.replace(/<[^>]*>/g, '').replace(/\$\$/g, '\\[').replace(/\\text/g, '\\mathrm')}
+
+\\section*{AISC Design Check}
+Per AISC 360 ASD Method:
+\\[F_b = 0.66 F_y = 0.66 \\times ${r.Fy} = ${r.allowableStress.toFixed(2)} \\text{ ksi}\\]
+\\[f_b = \\frac{M c}{I} = \\frac{M (d/2)}{I}\\]
+\\[UR = \\frac{f_b}{F_b} = ${r.utilization.toFixed(3)}\\]
+
+\\vspace{2cm}
+\\textit{Generated by Structural Design Calculator}
+
+\\end{document}
+`;
+      
+      // Download as .tex file
+      const blob = new Blob([latex], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `beam-calculation-${new Date().toISOString().split('T')[0]}.tex`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    function exportWord() {
+      const r = calculationResults;
+      let html = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <title>Beam Design Calculation Report</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; margin: 40px; }
+    h1 { font-size: 24px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+    h2 { font-size: 18px; margin-top: 30px; }
+    table { border-collapse: collapse; margin: 20px 0; width: 100%; }
+    td, th { border: 1px solid #000; padding: 8px; text-align: left; }
+    .result { font-weight: bold; }
+    .equation { font-family: 'Cambria Math', serif; margin: 15px 0; }
+  </style>
+</head>
+<body>
+  <h1>Beam Design Calculation Report</h1>
+  <p><strong>Date:</strong> ${new Date().toLocaleDateString()}</p>
+  
+  <h2>Beam Information</h2>
+  <table>
+`;
+      
+      if (r.type === 'simple') {
+        html += `
+    <tr><td>Beam Type</td><td>${r.beamType.replace('-', ' ').toUpperCase()}</td></tr>
+    <tr><td>Span Length</td><td>L = ${r.L} ft</td></tr>
+    <tr><td>Modulus of Elasticity</td><td>E = ${r.E} ksi</td></tr>
+    <tr><td>Yield Strength</td><td>Fy = ${r.Fy} ksi</td></tr>
+    <tr><td>Moment of Inertia</td><td>I = ${r.I} in⁴</td></tr>
+    <tr><td>Section Depth</td><td>d = ${r.d} in</td></tr>
+`;
+      } else {
+        html += `
+    <tr><td>Number of Spans</td><td>${r.numSpans}</td></tr>
+    <tr><td>Span Lengths</td><td>${r.spans.map((s, i) => `Span ${i+1}: ${s} ft`).join(', ')}</td></tr>
+    <tr><td>Modulus of Elasticity</td><td>E = ${r.E} ksi</td></tr>
+    <tr><td>Yield Strength</td><td>Fy = ${r.Fy} ksi</td></tr>
+    <tr><td>Moment of Inertia</td><td>I = ${r.I} in⁴</td></tr>
+`;
+      }
+      
+      html += `
+  </table>
+  
+  <h2>Results Summary</h2>
+  <table>
+`;
+      
+      if (r.type === 'simple') {
+        html += `
+    <tr><td>Maximum Moment</td><td class="result">Mmax = ${r.maxMoment.toFixed(2)} k-ft</td></tr>
+    <tr><td>Maximum Shear</td><td class="result">Vmax = ${r.maxShear.toFixed(2)} kips</td></tr>
+    <tr><td>Maximum Deflection</td><td class="result">Δmax = ${r.maxDeflection.toFixed(4)} in</td></tr>
+    <tr><td>Bending Stress</td><td class="result">fb = ${r.bendingStress.toFixed(2)} ksi</td></tr>
+    <tr><td>Allowable Stress (0.66Fy)</td><td class="result">Fb = ${r.allowableStress.toFixed(2)} ksi</td></tr>
+    <tr><td>Utilization Ratio</td><td class="result">UR = ${r.utilization.toFixed(3)}</td></tr>
+`;
+      } else {
+        html += `
+    <tr><td>Max Positive Moment</td><td class="result">Mpos = ${r.maxPosMoment.toFixed(2)} k-ft</td></tr>
+    <tr><td>Max Negative Moment</td><td class="result">Mneg = ${r.maxNegMoment.toFixed(2)} k-ft</td></tr>
+    <tr><td>Maximum Shear</td><td class="result">Vmax = ${r.maxShear.toFixed(2)} kips</td></tr>
+    <tr><td>Maximum Deflection</td><td class="result">Δmax = ${Math.abs(r.maxDeflection).toFixed(4)} in</td></tr>
+    <tr><td>Bending Stress</td><td class="result">fb = ${r.bendingStress.toFixed(2)} ksi</td></tr>
+    <tr><td>Utilization Ratio</td><td class="result">UR = ${r.utilization.toFixed(3)}</td></tr>
+`;
+      }
+      
+      html += `
+  </table>
+  
+  <h2>Design Equations</h2>
+  <p class="equation">Bending Stress: fb = M·c / I = M·(d/2) / I</p>
+  <p class="equation">Allowable Stress (ASD): Fb = 0.66·Fy</p>
+  <p class="equation">Utilization Ratio: UR = fb / Fb</p>
+`;
+      
+      if (r.type === 'simple') {
+        html += `
+  <h2>AISC Equations Applied</h2>
+  <p>Per AISC 360 ASD Method for flexure:</p>
+  <p class="equation">Mn = Fy·Zx (nominal moment strength)</p>
+  <p class="equation">Ωb = 1.67 (safety factor for flexure)</p>
+  <p class="equation">Ma ≤ Mn/Ωb (allowable moment)</p>
+`;
+      } else {
+        html += `
+  <h2>AISC Coefficient Method</h2>
+  <p>Continuous beam moments calculated using AISC Manual coefficients:</p>
+  <p class="equation">M = C·w·L² (for uniform loads)</p>
+  <p class="equation">M = C·P·L (for concentrated loads)</p>
+  <p>Where C is the moment coefficient based on number of spans and load pattern.</p>
+`;
+      }
+      
+      html += `
+  <p style="margin-top: 40px; font-style: italic; color: #666;">
+    Generated by Structural Design Calculator<br>
+    ${new Date().toLocaleString()}
+  </p>
+</body>
+</html>`;
+      
+      // Download as .doc file
+      const blob = new Blob([html], { type: 'application/msword' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `beam-calculation-${new Date().toISOString().split('T')[0]}.doc`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    function exportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const r = calculationResults;
+      
+      let y = 20;
+      
+      // Title
+      doc.setFontSize(18);
+      doc.text('Beam Design Calculation Report', 20, y);
+      y += 10;
+      
+      doc.setFontSize(10);
+      doc.text(`Date: ${new Date().toLocaleDateString()}`, 20, y);
+      y += 15;
+      
+      // Beam Info
+      doc.setFontSize(14);
+      doc.text('Beam Information', 20, y);
+      y += 8;
+      
+      doc.setFontSize(10);
+      if (r.type === 'simple') {
+        doc.text(`Beam Type: ${r.beamType.replace('-', ' ').toUpperCase()}`, 20, y); y += 6;
+        doc.text(`Span Length: L = ${r.L} ft`, 20, y); y += 6;
+        doc.text(`Modulus of Elasticity: E = ${r.E} ksi`, 20, y); y += 6;
+        doc.text(`Yield Strength: Fy = ${r.Fy} ksi`, 20, y); y += 6;
+        doc.text(`Moment of Inertia: I = ${r.I} in^4`, 20, y); y += 6;
+        doc.text(`Section Depth: d = ${r.d} in`, 20, y); y += 6;
+      } else {
+        doc.text(`Number of Spans: ${r.numSpans}`, 20, y); y += 6;
+        doc.text(`Span Lengths: ${r.spans.join(', ')} ft`, 20, y); y += 6;
+        doc.text(`Modulus of Elasticity: E = ${r.E} ksi`, 20, y); y += 6;
+        doc.text(`Yield Strength: Fy = ${r.Fy} ksi`, 20, y); y += 6;
+        doc.text(`Moment of Inertia: I = ${r.I} in^4`, 20, y); y += 6;
+      }
+      
+      y += 5;
+      
+      // Results
+      doc.setFontSize(14);
+      doc.text('Results Summary', 20, y);
+      y += 8;
+      
+      doc.setFontSize(10);
+      if (r.type === 'simple') {
+        doc.text(`Maximum Moment: Mmax = ${r.maxMoment.toFixed(2)} k-ft`, 20, y); y += 6;
+        doc.text(`Maximum Shear: Vmax = ${r.maxShear.toFixed(2)} kips`, 20, y); y += 6;
+        doc.text(`Maximum Deflection: Deltamax = ${r.maxDeflection.toFixed(4)} in`, 20, y); y += 6;
+        doc.text(`Bending Stress: fb = ${r.bendingStress.toFixed(2)} ksi`, 20, y); y += 6;
+        doc.text(`Allowable Stress (0.66Fy): Fb = ${r.allowableStress.toFixed(2)} ksi`, 20, y); y += 6;
+        doc.text(`Utilization Ratio: UR = ${r.utilization.toFixed(3)}`, 20, y); y += 6;
+      } else {
+        doc.text(`Max Positive Moment: Mpos = ${r.maxPosMoment.toFixed(2)} k-ft`, 20, y); y += 6;
+        doc.text(`Max Negative Moment: Mneg = ${r.maxNegMoment.toFixed(2)} k-ft`, 20, y); y += 6;
+        doc.text(`Maximum Shear: Vmax = ${r.maxShear.toFixed(2)} kips`, 20, y); y += 6;
+        doc.text(`Maximum Deflection: Deltamax = ${Math.abs(r.maxDeflection).toFixed(4)} in`, 20, y); y += 6;
+        doc.text(`Bending Stress: fb = ${r.bendingStress.toFixed(2)} ksi`, 20, y); y += 6;
+        doc.text(`Utilization Ratio: UR = ${r.utilization.toFixed(3)}`, 20, y); y += 6;
+      }
+      
+      y += 10;
+      
+      // Equations
+      doc.setFontSize(14);
+      doc.text('Design Equations', 20, y);
+      y += 8;
+      
+      doc.setFontSize(10);
+      doc.text('Bending Stress: fb = M*c/I = M*(d/2)/I', 20, y); y += 6;
+      doc.text('Allowable Stress (ASD): Fb = 0.66*Fy', 20, y); y += 6;
+      doc.text('Utilization Ratio: UR = fb/Fb', 20, y); y += 6;
+      
+      if (r.type === 'simple') {
+        y += 5;
+        doc.text('AISC 360 ASD Method:', 20, y); y += 6;
+        doc.text('Mn = Fy*Zx (nominal moment strength)', 20, y); y += 6;
+        doc.text('Omegab = 1.67 (safety factor for flexure)', 20, y); y += 6;
+        doc.text('Ma <= Mn/Omegab (allowable moment)', 20, y); y += 6;
+      } else {
+        y += 5;
+        doc.text('AISC Coefficient Method:', 20, y); y += 6;
+        doc.text('M = C*w*L^2 (uniform loads)', 20, y); y += 6;
+        doc.text('M = C*P*L (concentrated loads)', 20, y); y += 6;
+      }
+      
+      y += 10;
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(100);
+      doc.text('Generated by Structural Design Calculator', 20, y);
+      y += 4;
+      doc.text(new Date().toLocaleString(), 20, y);
+      
+      // Save
+      doc.save(`beam-calculation-${new Date().toISOString().split('T')[0]}.pdf`);
+    }
+  </script>
+</body>
+</html>
