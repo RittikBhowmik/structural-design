@@ -1,5 +1,2 @@
-# Beam Calculator - must come before the catch-all rule
+# Beam calculator SPA fallback — must precede any broader catch-all.
 /tools/beam-calculator/*    /tools/beam-calculator/dist/index.html   200
-
-# VitePress - catch-all for main site
-/*    /.vitepress/dist/index.html   200

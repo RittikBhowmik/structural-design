@@ -46,4 +46,4 @@ target/
 .pytest_cache/
 
 # Except beam calculator dist (needed for Cloudflare Pages)
-!tools/Beam Design Calculator/dist/
+!tools/beam-calculator/dist/
