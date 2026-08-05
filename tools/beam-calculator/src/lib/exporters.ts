@@ -212,7 +212,7 @@ export function exportWord(r: ExportReport) {
       (s) => `
   <h3>${esc(s.title)}</h3>
   ${s.note ? `<p class="note">${esc(s.note)}</p>` : ''}
-  ${s.latex.map((l) => `<p class="equation">${esc(l)}</p>`).join('\n')}`,
+  ${s.latex.map((l) => `<p class="equation">${esc(latexToPlain(l))}</p>`).join('\n')}`,
     )
     .join('\n');
 
