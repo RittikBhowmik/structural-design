@@ -1,0 +1,3 @@
+# Redirect for Beam Design Calculator subdirectory
+/Beam Design Calculator/* /tools/Beam Design Calculator/dist/:splat 200
+/tools/Beam Design Calculator/* /tools/Beam Design Calculator/dist/:splat 200
