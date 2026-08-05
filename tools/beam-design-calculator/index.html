@@ -1288,6 +1288,8 @@
       document.getElementById('simple-results').style.display = 'block';
       
       // Store results for export
+      const reactions = { leftReaction: maxShear, rightReaction: maxShear, leftMoment: 0 };
+      
       calculationResults = {
         type: 'simple',
         beamType,
@@ -1300,7 +1302,8 @@
         allowableStress,
         utilization,
         loadCases,
-        mathOutput
+        mathOutput,
+        reactions
       };
       
       // Draw all diagrams
