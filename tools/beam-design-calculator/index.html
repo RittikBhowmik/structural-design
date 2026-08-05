@@ -1357,7 +1357,7 @@
         } else if (load.type === 'moment') {
           const x = margin + load.position * scale;
           drawMomentLoad(ctx, x, beamY, load.magnitude);
-        } else if (load.type === 'udl-full') {
+        } else if (load.type === 'udl') {
           drawUDL(ctx, margin, margin + beamLength, beamY, load.magnitude);
         } else if (load.type === 'udl-partial') {
           const startX = margin + load.udlStart * scale;
@@ -1610,7 +1610,7 @@
       loadCases.forEach(load => {
         if (load.type === 'point' && load.position < x) {
           V -= load.magnitude;
-        } else if (load.type === 'udl-full') {
+        } else if (load.type === 'udl') {
           const udlEnd = Math.min(x, L);
           V -= load.magnitude * (udlEnd - 0);
         } else if (load.type === 'udl-partial' && load.udlStart < x) {
@@ -1707,7 +1707,7 @@
           M -= load.magnitude * (x - load.position);
         } else if (load.type === 'moment' && load.position < x) {
           M -= load.magnitude;
-        } else if (load.type === 'udl-full') {
+        } else if (load.type === 'udl') {
           const udlEnd = Math.min(x, L);
           const udlLoad = load.magnitude * udlEnd;
           M -= udlLoad * (udlEnd / 2);
@@ -2158,7 +2158,7 @@
         r.loadCases.forEach((load, idx) => {
           latex += `\\subsection*{Load Case ${idx + 1}}
 Load Type: ${load.type.toUpperCase()}\\\\
-Magnitude: ${load.magnitude} ${load.type === 'udl-full' || load.type === 'udl-partial' ? 'k/ft' : load.type === 'moment' ? 'k-ft' : 'kips'}\\\\
+Magnitude: ${load.magnitude} ${load.type === 'udl' || load.type === 'udl-partial' ? 'k/ft' : load.type === 'moment' ? 'k-ft' : 'kips'}\\\\
 `;
           if (load.type === 'point' || load.type === 'moment') {
             latex += `Position: ${load.position} ft from left support\\\\
