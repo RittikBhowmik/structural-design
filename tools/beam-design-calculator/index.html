@@ -470,6 +470,45 @@
       background: var(--off-white);
       color: var(--black);
     }
+    
+    /* Support selector buttons */
+    .support-selector {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .support-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 16px;
+      background: var(--white);
+      border: 1px solid var(--light-border);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    
+    .support-btn:hover {
+      background: var(--soft-background);
+      border-color: #D0D0D0;
+    }
+    
+    .support-btn.active {
+      background: var(--black);
+      border-color: var(--black);
+      color: var(--white);
+    }
+    
+    .support-btn.active svg {
+      stroke: var(--white);
+    }
+    
+    .support-btn span {
+      font-size: 12px;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -507,17 +546,46 @@
           <h2 class="card-title">Beam Configuration</h2>
           <div class="form-grid">
             <div class="form-group">
-              <label for="beam-type">Beam Type</label>
-              <select id="beam-type">
-                <option value="simply-supported">Simply Supported</option>
-                <option value="cantilever">Cantilever</option>
-                <option value="fixed-fixed">Fixed-Fixed</option>
-                <option value="propped-cantilever">Propped Cantilever</option>
-              </select>
-            </div>
-            <div class="form-group">
               <label for="beam-length">Beam Length (ft)</label>
               <input type="number" id="beam-length" value="20" step="0.1" min="1">
+            </div>
+            <div class="form-group">
+              <label>Left End Support</label>
+              <div class="support-selector">
+                <button type="button" class="support-btn active" data-support="pinned" data-end="left">
+                  <svg viewBox="0 0 40 40" width="40" height="40"><path d="M20 5 L20 25 M5 25 L35 25 L20 35 Z" fill="none" stroke="#171717" stroke-width="2"/></svg>
+                  <span>Pinned</span>
+                </button>
+                <button type="button" class="support-btn" data-support="fixed" data-end="left">
+                  <svg viewBox="0 0 40 40" width="40" height="40"><path d="M20 5 L20 25 M5 10 L20 25 M5 15 L20 25 M5 20 L20 25" fill="none" stroke="#171717" stroke-width="2"/></svg>
+                  <span>Fixed</span>
+                </button>
+                <button type="button" class="support-btn" data-support="free" data-end="left">
+                  <svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="15" fill="none" stroke="#171717" stroke-width="2"/></svg>
+                  <span>Free</span>
+                </button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Right End Support</label>
+              <div class="support-selector">
+                <button type="button" class="support-btn" data-support="roller" data-end="right">
+                  <svg viewBox="0 0 40 40" width="40" height="40"><path d="M20 5 L20 25" stroke="#171717" stroke-width="2"/><circle cx="20" cy="30" r="8" fill="none" stroke="#171717" stroke-width="2"/></svg>
+                  <span>Roller</span>
+                </button>
+                <button type="button" class="support-btn active" data-support="pinned" data-end="right">
+                  <svg viewBox="0 0 40 40" width="40" height="40"><path d="M20 5 L20 25 M5 25 L35 25 L20 35 Z" fill="none" stroke="#171717" stroke-width="2"/></svg>
+                  <span>Pinned</span>
+                </button>
+                <button type="button" class="support-btn" data-support="fixed" data-end="right">
+                  <svg viewBox="0 0 40 40" width="40" height="40"><path d="M20 5 L20 25 M5 10 L20 25 M5 15 L20 25 M5 20 L20 25" fill="none" stroke="#171717" stroke-width="2"/></svg>
+                  <span>Fixed</span>
+                </button>
+                <button type="button" class="support-btn" data-support="free" data-end="right">
+                  <svg viewBox="0 0 40 40" width="40" height="40"><circle cx="20" cy="20" r="15" fill="none" stroke="#171717" stroke-width="2"/></svg>
+                  <span>Free</span>
+                </button>
+              </div>
             </div>
             <div class="form-group">
               <label for="modulus-E">Modulus of Elasticity, E (ksi)</label>
@@ -789,6 +857,26 @@
     let currentExportType = null;
     let currentBeamType = 'simple';
     let calculationResults = null;
+    let leftSupport = 'pinned';
+    let rightSupport = 'roller';
+    
+    // Support button click handlers
+    document.querySelectorAll('.support-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const end = btn.dataset.end;
+        const support = btn.dataset.support;
+        
+        // Remove active class from siblings
+        btn.parentElement.querySelectorAll('.support-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        if (end === 'left') {
+          leftSupport = support;
+        } else {
+          rightSupport = support;
+        }
+      });
+    });
     
     // Tab switching
     document.querySelectorAll('.tab').forEach(tab => {
@@ -871,7 +959,9 @@
       const Fy = parseFloat(document.getElementById('yield-strength').value);
       const I = parseFloat(document.getElementById('moment-inertia').value);
       const d = parseFloat(document.getElementById('section-depth').value);
-      const beamType = document.getElementById('beam-type').value;
+      
+      // Determine beam type from supports
+      const beamType = `${leftSupport}-${rightSupport}`;
       
       // Collect load cases
       const loadCases = [];
