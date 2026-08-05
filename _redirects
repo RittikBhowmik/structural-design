@@ -1,3 +1,6 @@
-# Redirect for Beam Design Calculator subdirectory
-/tools/Beam%20Design%20Calculator/* /tools/Beam Design Calculator/dist/:splat 200
-/tools/Beam Design Calculator/* /tools/Beam Design Calculator/dist/:splat 200
+# Redirect for Beam Design Calculator subdirectory - MUST be first
+/Beam Design Calculator/* /tools/Beam Design Calculator/dist/index.html 200
+/tools/Beam Design Calculator/* /tools/Beam Design Calculator/dist/index.html 200
+
+# VitePress routes
+/* /.vitepress/dist/index.html 200
